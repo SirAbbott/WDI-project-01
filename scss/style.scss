@@ -1,0 +1,10 @@
+$color: peachpuff;
+$background: dodgerblue;
+
+h1 {
+  color: $color;
+  text-align: center;
+  background: $background;
+  border: 2px solid orange;
+  padding: 30px;
+}
