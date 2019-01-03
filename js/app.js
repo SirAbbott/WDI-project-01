@@ -1,75 +1,43 @@
 $(() => {
-  const gridWidth = 7;
+
+  let $squares
+  let index
+  const gridWidth = 7
   // const $ships = $(".ships");
-  const $board = $(".board");
+  const $board = $('.board')
   var player1 = [
-    1,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    1,
-    0,
-    1,
-    1,
-    1,
-    0,
-    0,
-    1,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    1,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    1,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    1,
-    0,
-    0,
-    1,
-    1,
-    0,
-    0,
-    1,
-    0,
-    0,
-    0,
-    0,
-    0
-  ];
+    1, 0, 0, 0, 0, 0, 0,
+    1, 0, 1, 1, 1, 0, 0,
+    1, 0, 0, 0, 0, 0, 0,
+    0, 1, 0, 0, 0, 0, 0,
+    0, 1, 0, 0, 0, 0, 0,
+    0, 1, 0, 0, 1, 1, 0,
+    0, 1, 0, 0, 0, 0, 0
+  ]
   // var player2 = []
-  // const ship = [0, 1, 2, 3];
+
 
   for (let i = 0; i < gridWidth * gridWidth; i++) {
     // Create square
-    $board.append($("<div />"));
+    $board.append($('<div />'))
   }
 
-  $squares = $board.find("div");
-  console.log($squares);
+  $squares = $board.find('div')
+  console.log($squares)
 
-  $squares.on("click", e => {
-    const squaresArray = Array.from($squares);
-    const index = squaresArray.indexOf(e.target);
-    console.log(index);
-    console.log(player1[index]);
-  });
+  $squares.on('click', e => {
+    const squaresArray = Array.from($squares)
+    index = squaresArray.indexOf(e.target)
+    console.log(index)
+    console.log(player1[index])
+    checkValue()
+  })
+
+  function checkValue() {
+    if (index === 1) {
+      index = 2
+    } else return
+  }
 
   // place ships on grid
   // $ships.on("click", select);
@@ -97,4 +65,4 @@ $(() => {
   //     player1[indexGuessed].hit = true;
   //   }
   // }
-});
+})
