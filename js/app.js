@@ -34,9 +34,11 @@ $(() => {
   })
 
   function checkValue() {
-    if (index === 1) {
-      index = 2
-    } else return
+    if (player1[index] === 1) {
+      player1[index] = 2
+    } else if (player1[index] === 0) {
+      player1[index] = 3
+    }
   }
 
   // place ships on grid
