@@ -1,14 +1,80 @@
-document.addEventListener("DOMContentLoaded", () => {
-  let $board;
-  let $squares;
+$(() => {
   const gridWidth = 7;
+  // const $ships = $(".ships");
   const $board = $(".board");
+  var player1 = [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    1,
+    1,
+    1,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    1,
+    1,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ];
+  // var player2 = []
+  // const ship = [0, 1, 2, 3];
 
   for (let i = 0; i < gridWidth * gridWidth; i++) {
     // Create square
     $board.append($("<div />"));
   }
+
   $squares = $board.find("div");
+  console.log($squares);
+
+  $squares.on("click", e => {
+    const squaresArray = Array.from($squares);
+    const index = squaresArray.indexOf(e.target);
+    console.log(index);
+    console.log(player1[index]);
+  });
+
+  // place ships on grid
+  // $ships.on("click", select);
+
+  // function select(e) {}
 
   // let player1 = new Array(gridSize);
   // let player2 = new Array(gridSize);
