@@ -1,10 +1,62 @@
-$color: peachpuff;
-$background: dodgerblue;
+* {
+  box-sizing: border-box;
 
-h1 {
-  color: $color;
-  text-align: center;
-  background: $background;
-  border: 2px solid orange;
-  padding: 30px;
+  body {
+    main {
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      margin: 0;
+
+      .board {
+        width: 505px;
+        height: 505px;
+        display: flex;
+        flex-wrap: wrap;
+        margin: auto;
+      }
+      .board div {
+        flex-grow: 1;
+        width: 70px;
+        height: 70px;
+        border: 1px grey solid;
+      }
+
+      .ships {
+        display: flex;
+        align-content: space-around;
+        margin: 2px;
+
+        .ship-five {
+          height: 70px;
+          width: 350px;
+          background-color: red;
+          margin: 2px;
+        }
+
+        .ship-four {
+          height: 70px;
+          width: 280px;
+          background-color: green;
+          margin: 2px;
+        }
+
+        .ship-three {
+          height: 70px;
+          width: 210px;
+          background-color: yellow;
+          margin: 2px;
+        }
+
+        .ship-two {
+          height: 70px;
+          width: 140px;
+          background-color: purple;
+          margin: 2px;
+        }
+      }
+    }
+  }
 }
