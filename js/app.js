@@ -17,11 +17,13 @@
 $(() => {
   const gridWidth = 10
   const $board = $('.board')
+  let player1Original
+  let player1
   let cpuPlayerOriginal
   let cpuPlayer
   const ships = [{
     name: 'Patrol Boat',
-    color: 'red',
+    color: 'yellow',
     l: 2,
     v: 2
   }, {
@@ -60,20 +62,24 @@ $(() => {
   // displayBoardInConsole(player1, gridWidth)
 
   // const player1 = new Array(grid*grid)
-  for (let i = 0; i < gridWidth * gridWidth; i++) {
-    // Create square
-    $board.append($(`<div>${i}</div>`))
+  function createBoard() {
+    for (let i = 0; i < gridWidth * gridWidth; i++) {
+      // Create square
+      $board.append($('<div>'))
+    }
   }
+  createBoard()
 
   const $squares = $board.find('div')
   const squaresArray = Array.from($squares)
-
   $squares.on('click', e => {
     const index = squaresArray.indexOf(e.target)
     console.log(index)
     console.log(cpuPlayer[index])
     checkValue(index, e)
   })
+
+
 
   function checkValue(index, e) {
     const value = cpuPlayer[index]
@@ -87,7 +93,7 @@ $(() => {
     } else if (value) {
       cpuPlayer[index] = 1
       $(e.target).css({
-        'background-color': 'yellow'
+        'background-color': 'red'
       })
       // Check to see if the array still contains any of the same value
       // If not, then the ship must have been sunk!
@@ -111,10 +117,20 @@ $(() => {
     } else {
       cpuPlayer[index] = 0
       $(e.target).css({
-        'background-color': 'red'
+        'background-color': 'grey'
       })
     }
   }
+
+
+  function createPlayer() {
+    player1Original = Array.apply(undefined, {
+      length: gridWidth * gridWidth
+    })
+    player1 = [...player1Original]
+    console.log(player1)
+  }
+  createPlayer()
 
   function createCpuPlayer() {
     // Create an array with undefined values the size of the gridWidth in length and height
@@ -221,6 +237,7 @@ $(() => {
 })
 
 // ----------------------------------------------
+
 function chunkArray(board, gridWidth) {
   const rows = []
   for (let i = 0, j = board.length; i < j; i += gridWidth) {
