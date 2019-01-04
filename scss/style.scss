@@ -17,6 +17,7 @@
         flex-wrap: wrap;
         margin: auto;
       }
+
       .board div {
         flex-grow: 1;
         width: 70px;
@@ -24,39 +25,46 @@
         border: 1px grey solid;
       }
 
-      // .ships {
-      //   display: flex;
-      //   align-content: space-around;
-      //   margin: 2px;
+      .ships {
+        display: flex;
+        align-content: space-around;
+        margin: 2px;
 
-      //   .ship-five {
-      //     height: 70px;
-      //     width: 350px;
-      //     background-color: red;
-      //     margin: 2px;
-      //   }
+        .aircraft-carrier {
+          height: 70px;
+          width: 350px;
+          background-color: red;
+          margin: 2px;
+        }
 
-      //   .ship-four {
-      //     height: 70px;
-      //     width: 280px;
-      //     background-color: green;
-      //     margin: 2px;
-      //   }
+        .battleship {
+          height: 70px;
+          width: 280px;
+          background-color: green;
+          margin: 2px;
+        }
 
-      //   .ship-three {
-      //     height: 70px;
-      //     width: 210px;
-      //     background-color: yellow;
-      //     margin: 2px;
-      //   }
+        .submarine {
+          height: 70px;
+          width: 210px;
+          background-color: yellow;
+          margin: 2px;
+        }
 
-      //   .ship-two {
-      //     height: 70px;
-      //     width: 140px;
-      //     background-color: purple;
-      //     margin: 2px;
-      //   }
-      // }
+        .patrol-boat {
+          height: 70px;
+          width: 140px;
+          background-color: purple;
+          margin: 2px;
+        }
+
+        .destroyer {
+          height: 70px;
+          width: 210px;
+          background-color: pink;
+          margin: 2px;
+        }
+      }
     }
   }
 }
