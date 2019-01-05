@@ -83,8 +83,6 @@ $(() => {
 
   $squares.on('click', e => {
     const index = squaresArray.indexOf(e.target)
-    console.log(index)
-    console.log(cpuPlayer[index])
     checkValue(index, e)
   })
 
@@ -124,22 +122,21 @@ $(() => {
 
 
   $ships.on('click', (e) => {
-    // console.log($(e.target))
-    // console.log('THIS', $(this))
     const clickedShip = $(e.target)
+    // take data attribute from HTML and assign to the event target
     const selectedShipName = clickedShip.data('name')
-    console.log(selectedShipName)
+    // console.log(selectedShipName)
+    // make the event-target our object
     const selectedShip = ships.find(ships => ships.name === selectedShipName)
-    console.log(selectedShip.l)
-    player1Original = selectedShip.v
-    console.log("player1", player1Original)
-    // $(squaresArray2).css({
-    //   'background-color': selectedShip.color
-    // })
+    // console.log(selectedShip)
+    // replace the indexes of array by the ship l
+    // player1Original = selectedShip.v
+    for (let i = 0; i < selectedShip.l; i++) {
+      $(squaresArray2[i]).css({
+        'background-color': selectedShip.color
+      })
+    }
   })
-
-
-
 
   function checkValue(index, e) {
     const value = cpuPlayer[index]
@@ -169,7 +166,7 @@ $(() => {
         // The length would give you which ship has been sunk...
         console.log(sunkIndexes.length)
         // Turn them all black
-        sunkIndexes.forEach(s => $(squaresArray[s]).css({
+        sunkIndexes.forEach(sunk => $(squaresArray[sunk]).css({
           'background-color': 'black'
         }))
       }
@@ -181,7 +178,6 @@ $(() => {
       })
     }
   }
-
 
   function checkForValidMove(board, ship) {
     // Build an array to look up the original indexes regardless of whether it has been rotated or not
@@ -198,7 +194,6 @@ $(() => {
       // Rotate the indexes along with the board
       arrayOfIndexes = rotateBoard(arrayOfIndexes, gridWidth)
     }
-
     // Split the board into rows to help not select squares that are crossing a border
     const rows = chunkArray(board, gridWidth)
     // Create a counter for the index of the board
