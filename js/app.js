@@ -14,13 +14,32 @@
 // Select one
 // Store the correct number in it
 
+//https://github.com/LearnTeachCode/Battleship-JavaScript/blob/gh-pages/battleship.js
+
+// var u = undefined
+// var player1Original = [
+//   3, u, u, u, u, u, 4,
+//   3, 5, 5, 5, 5, u, 4,
+//   3, 6, u, u, u, u, 4,
+//   u, 6, u, u, u, u, u,
+//   u, 6, u, u, u, u, u,
+//   u, 6, u, u, 2, 2, u,
+//   u, 6, u, u, u, u, u
+// ]
+// var player1 = player1Original.slice(0)
+// displayBoardInConsole(player1, gridWidth)
+
+// const player1 = new Array(grid*grid)
+
 $(() => {
   const gridWidth = 10
   const $board = $('.board')
+  const $board2 = $('.board2')
   let player1Original
   let player1
   let cpuPlayerOriginal
   let cpuPlayer
+  const $ships = $('.ship')
   const ships = [{
     name: 'Patrol Boat',
     color: 'yellow',
@@ -28,12 +47,12 @@ $(() => {
     v: 2
   }, {
     name: 'Destroyer',
-    color: 'orange',
+    color: 'blue',
     l: 3,
     v: 3
   }, {
     name: 'Submarine',
-    color: 'blue',
+    color: 'orange',
     l: 3,
     v: 4
   }, {
@@ -48,36 +67,77 @@ $(() => {
     v: 6
   }]
 
-  // var u = undefined
-  // var player1Original = [
-  //   3, u, u, u, u, u, 4,
-  //   3, 5, 5, 5, 5, u, 4,
-  //   3, 6, u, u, u, u, 4,
-  //   u, 6, u, u, u, u, u,
-  //   u, 6, u, u, u, u, u,
-  //   u, 6, u, u, 2, 2, u,
-  //   u, 6, u, u, u, u, u
-  // ]
-  // var player1 = player1Original.slice(0)
-  // displayBoardInConsole(player1, gridWidth)
-
-  // const player1 = new Array(grid*grid)
-  function createBoard() {
+  function createBoards() {
     for (let i = 0; i < gridWidth * gridWidth; i++) {
       // Create square
       $board.append($('<div>'))
+      $board2.append($('<div>'))
     }
   }
-  createBoard()
+
+  createBoards()
+
 
   const $squares = $board.find('div')
   const squaresArray = Array.from($squares)
+
   $squares.on('click', e => {
     const index = squaresArray.indexOf(e.target)
     console.log(index)
     console.log(cpuPlayer[index])
     checkValue(index, e)
   })
+
+  function createCpuPlayer() {
+    // Create an array with undefined values the size of the gridWidth in length and height
+    // - new Array(gridWidth * gridWidth) doesn't add undefined to the array?!
+    cpuPlayerOriginal = Array.apply(undefined, {
+      length: gridWidth * gridWidth
+    })
+
+    // Loop through all ship pieces and find a space for it...
+    ships.forEach(ship => checkForValidMove(cpuPlayerOriginal, ship))
+
+    // make a copy of the array for the game (i.e. sunk and miss shots etc)
+    cpuPlayer = [...cpuPlayerOriginal]
+  }
+
+  createCpuPlayer()
+
+  function createPlayer1() {
+    player1Original = Array.apply(undefined, {
+      length: gridWidth * gridWidth
+    })
+    player1 = [...player1Original]
+  }
+
+  createPlayer1()
+
+  const $squares2 = $board2.find('div')
+  const squaresArray2 = Array.from($squares2)
+
+  $squares2.on('click', e => {
+    const index = squaresArray2.indexOf(e.target)
+    console.log(index)
+    console.log(player1[index])
+  })
+
+
+  $ships.on('click', (e) => {
+    // console.log($(e.target))
+    // console.log('THIS', $(this))
+    const clickedShip = $(e.target)
+    const selectedShipName = clickedShip.data('name')
+    console.log(selectedShipName)
+    const selectedShip = ships.find(ships => ships.name === selectedShipName)
+    console.log(selectedShip.l)
+    player1Original = selectedShip.v
+    console.log("player1", player1Original)
+    // $(squaresArray2).css({
+    //   'background-color': selectedShip.color
+    // })
+  })
+
 
 
 
@@ -122,33 +182,6 @@ $(() => {
     }
   }
 
-
-  function createPlayer() {
-    player1Original = Array.apply(undefined, {
-      length: gridWidth * gridWidth
-    })
-    player1 = [...player1Original]
-    console.log(player1)
-  }
-  createPlayer()
-
-  function createCpuPlayer() {
-    // Create an array with undefined values the size of the gridWidth in length and height
-    // - new Array(gridWidth * gridWidth) doesn't add undefined to the array?!
-    cpuPlayerOriginal = Array.apply(undefined, {
-      length: gridWidth * gridWidth
-    })
-
-    // displayBoardInConsole(cpuPlayerOriginal, gridWidth)
-
-    // Loop through all ship pieces and find a space for it...
-    ships.forEach(ship => checkForValidMove(cpuPlayerOriginal, ship))
-
-    // make a copy of the array for the game (i.e. sunk and miss shots etc)
-    cpuPlayer = [...cpuPlayerOriginal]
-  }
-
-  createCpuPlayer()
 
   function checkForValidMove(board, ship) {
     // Build an array to look up the original indexes regardless of whether it has been rotated or not
@@ -198,7 +231,7 @@ $(() => {
 
     // Remove all empty arrays where no move was possible in a row
     // We only want the available spaces where the ship can actually fit
-    availableSpaces = availableSpaces.filter(av => av.length > 0)
+    availableSpaces = availableSpaces.filter(available => available.length > 0)
 
     // Select random free chunk
     // This selected space is going to be ALL possible spaces, i.e [0,1,2,3,4]
@@ -234,6 +267,7 @@ $(() => {
       })
     })
   }
+
 })
 
 // ----------------------------------------------
@@ -252,6 +286,8 @@ function rotateBoard(board, gridWidth) {
   const unflattened = a[0].map((col, c) => a.map((row, r) => a[r][c]).reverse())
   return unflattened.flat()
 }
+
+
 
 // function displayBoardInConsole(board, gridWidth) {
 //   // Split the board into rows
