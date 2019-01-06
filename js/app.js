@@ -55,12 +55,14 @@ $(() => {
   let player1
   let cpuPlayerOriginal
   let cpuPlayer
+  let selectedShip
   let hitcount = 0
+  const target = 17
   // const $startgameButton = $('start-game')
   const $ships = $('.ship')
   const ships = [{
       name: 'Patrol Boat',
-      color: 'Patrol Boat',
+      color: 'yellow',
       l: 2,
       v: 2
     },
@@ -138,67 +140,98 @@ $(() => {
   })
 
   $ships.on('click', e => {
+    shipPosition = []
     // let counter = 0;
     const clickedShip = $(e.target)
     // take data attribute from HTML and assign to the event target
     const selectedShipName = clickedShip.data('name')
     // console.log(selectedShipName)
     // make the event-target our object
-    const selectedShip = ships.find(ships => ships.name === selectedShipName)
+    selectedShip = ships.find(ships => ships.name === selectedShipName)
     console.log(selectedShip)
     // replace the indexes of array by the ship l
-    const shipPosition = []
+
     for (let i = 0; i < selectedShip.l; i++) {
       shipPosition.push(i)
       player1Original[i] = selectedShip.v
-      $(squaresArray2[i]).css({
-        'background-color': selectedShip.color
+      $(squaresArray2[i]).addClass('active')
+      clickedShip.css({
+        height: 0,
+        width: 0
       })
     }
-    //event listener for key strokes
-    $(document).on('keydown', e => {
-      // loop through shipPosition then move all.
-      // left 37, up 38, right 39, down 40
-      switch (e.keyCode) {
-        case 37:
-          if (shipPosition[0] % gridWidth > 0) {
-            shipPosition.forEach(
-              (position, i) => (shipPosition[i] = position - 1)
-            )
-            console.log('left', shipPosition)
-          }
-          break
-        case 38:
-          if (shipPosition[shipPosition.length - 1] - gridWidth >= 0) {
-            shipPosition.forEach(
-              (position, i) => (shipPosition[i] = position - gridWidth)
-            )
-            console.log('up', shipPosition)
-          }
-          break
-        case 39:
-          if (shipPosition[shipPosition.length - 1] % gridWidth < gridWidth - 1) {
-            shipPosition.forEach(
-              (position, i) => (shipPosition[i] = position + 1)
-            )
-            console.log('right', shipPosition)
-          }
-          break
-        case 40:
-          if (shipPosition[0] + gridWidth < gridWidth * gridWidth) {
-            shipPosition.forEach(
-              (position, i) => (shipPosition[i] = position + gridWidth)
-            )
-            console.log('down', shipPosition)
-          }
-          break
-      }
-    })
+    // squares.removeClass(active)
     // counter++;
     // console.log(counter);
     // if (counter === 5) {
     //   $startgameButton.addClass();
     // }
+  })
+
+  //////////////////////////////////////////////////
+
+  let shipPosition = []
+
+  //event listener for key strokes
+  $(document).on('keydown', e => {
+
+    switch (e.keyCode) {
+      case 37:
+        if (shipPosition[0] % gridWidth > 0) {
+          $squares2.removeClass('active')
+          shipPosition.forEach((position, i) => {
+            shipPosition[i] = position - 1
+            $($squares2[shipPosition[i]]).addClass('active')
+          })
+          console.log('left', shipPosition)
+        }
+        break
+      case 38:
+        if (shipPosition[shipPosition.length - 1] - gridWidth >= 0) {
+          $squares2.removeClass('active')
+          shipPosition.forEach(
+            (position, i) => {
+              (shipPosition[i] = position - gridWidth)
+              $($squares2[shipPosition[i]]).addClass('active')
+            })
+          console.log('up', shipPosition)
+        }
+        break
+      case 39:
+        if (shipPosition[shipPosition.length - 1] % gridWidth < gridWidth - 1) {
+          $squares2.removeClass('active')
+          shipPosition.forEach((position, i) => {
+            shipPosition[i] = position + 1
+            $($squares2[shipPosition[i]]).addClass('active')
+          })
+          console.log('right', shipPosition)
+        }
+        break
+      case 40:
+        if (shipPosition[0] + gridWidth < gridWidth * gridWidth) {
+          $squares2.removeClass('active')
+          shipPosition.forEach(
+            (position, i) => {
+              (shipPosition[i] = position + gridWidth)
+              $($squares2[shipPosition[i]]).addClass('active')
+            })
+          console.log('down', shipPosition)
+        }
+        break
+      case 32:
+        shipPosition.rotateShip()
+        break
+
+      case 13:
+        shipPosition.forEach(i => {
+          $(squaresArray2[i]).css({
+            'background-color': selectedShip.color
+          }) // <---- this could be a unique class for the ship
+          player1Original[i] = selectedShip.v
+        })
+        shipPosition = []
+        break
+    }
   })
 
   function checkValue(index, e) {
@@ -216,6 +249,9 @@ $(() => {
         'background-color': 'red'
       })
       hitcount++
+      if (hitcount === target) {
+        alert('YOU HAVE WON')
+      }
       console.log('hitcount', hitcount)
       // Check to see if the array still contains any of the same value
       // If not, then the ship must have been sunk!
@@ -355,6 +391,8 @@ function rotateBoard(board, gridWidth) {
   )
   return unflattened.flat()
 }
+
+
 
 // function displayBoardInConsole(board, gridWidth) {
 //   // Split the board into rows

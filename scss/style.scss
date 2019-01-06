@@ -17,7 +17,7 @@
         display: flex;
         flex-wrap: wrap;
         // margin: 20px;
-        // border: black 3px solid;
+        border: black 1px solid;
       }
 
       .board2 {
@@ -41,6 +41,18 @@
         width: 50px;
         height: 50px;
         border: 1px grey solid;
+      }
+
+      .hidden {
+        background-color: transparent;
+      }
+
+      .placed {
+        background-color: #11F8F8;
+      }
+
+      .active {
+        background-color: #1BF811;
       }
 
       .pieces {
