@@ -161,35 +161,36 @@ $(() => {
       // left 37, up 38, right 39, down 40
       switch (e.keyCode) {
         case 37:
-          // So this will just loop through... You need to do this:
-          shipPosition.forEach(
-            (position, i) => (shipPosition[i] = position - 1)
-          )
-          console.log('left', shipPosition)
-
+          if (shipPosition[0] % gridWidth > 0) {
+            shipPosition.forEach(
+              (position, i) => (shipPosition[i] = position - 1)
+            )
+            console.log('left', shipPosition)
+          }
           break
         case 38:
-          // if (shipPosition - gridWidth >= 0) {
-          shipPosition.forEach(
-            (position, i) => (shipPosition[i] = position - gridWidth)
-          )
-          console.log('up', shipPosition)
-
+          if (shipPosition[shipPosition.length - 1] - gridWidth >= 0) {
+            shipPosition.forEach(
+              (position, i) => (shipPosition[i] = position - gridWidth)
+            )
+            console.log('up', shipPosition)
+          }
           break
         case 39:
-          shipPosition.forEach(
-            (position, i) => (shipPosition[i] = position + 1)
-          )
-          console.log('right', shipPosition)
-
+          if (shipPosition[shipPosition.length - 1] % gridWidth < gridWidth - 1) {
+            shipPosition.forEach(
+              (position, i) => (shipPosition[i] = position + 1)
+            )
+            console.log('right', shipPosition)
+          }
           break
         case 40:
-          // if (shipPosition + gridWidth < gridWidth * gridWidth) {
-          shipPosition.forEach(
-            (position, i) => (shipPosition[i] = position + gridWidth)
-          )
-          console.log('down', shipPosition)
-          // }
+          if (shipPosition[0] + gridWidth < gridWidth * gridWidth) {
+            shipPosition.forEach(
+              (position, i) => (shipPosition[i] = position + gridWidth)
+            )
+            console.log('down', shipPosition)
+          }
           break
       }
     })
