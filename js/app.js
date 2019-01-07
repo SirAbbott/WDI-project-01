@@ -6,17 +6,18 @@
 // battleship (4)        = 5
 // aircraft-carrier (5)  = 6
 
+
 $(() => {
   const gridWidth = 10
-  const $board = $('.board')
-  const $board2 = $('.board2')
+  const $cpuBoard = $('.board')
+  const $playerBoard = $('.board2')
   let player1Original
   let player1
   let cpuPlayerOriginal
   let cpuPlayer
   let shipPosition = []
   let selectedShip
-  let isPlayer = true
+  let placing = true
 
   // let hitcount = 0
   // const target = 17
@@ -59,46 +60,47 @@ $(() => {
   function createBoards() {
     for (let i = 0; i < gridWidth * gridWidth; i++) {
       // Create square
-      $board2.append($('<div>'))
-      $board.append($('<div>'))
+      $playerBoard.append($('<div>'))
+      $cpuBoard.append($('<div>'))
     }
   }
   createBoards()
 
-  const $squares = $board.find('div')
-  const squaresArray = Array.from($squares)
-  $squares.on('click', e => {
-    const index = squaresArray.indexOf(e.target)
-    console.log('CPU', index, cpuPlayerOriginal[index])
-    checkValue(index, e)
+  const $cpuSquares = $cpuBoard.find('div')
+  const cpuSquaresArray = Array.from($cpuSquares)
+  const $playerSquares = $playerBoard.find('div')
+  const playerSquaresArray = Array.from($playerSquares)
+
+  createCpuPlayer()
+  createPlayer1()
+
+
+  $cpuSquares.on('click', e => {
+    const index = cpuSquaresArray.indexOf(e.target)
+    checkValue(index, cpuPlayer, cpuPlayerOriginal, $cpuSquares)
     cpuMove()
   })
 
   function cpuMove() {
-    checkValue()
+    const index = getRandomNumber()
+    checkValue(index, player1, player1Original, $playerSquares)
   }
+
+  // index, e, player, board, squares
 
   function getRandomNumber() {
-    return squaresArray2[Math.floor(Math.random() * gridWidth * gridWidth)]
+    return Math.floor(Math.random() * gridWidth * gridWidth)
   }
 
-  // $squares2.on('click', e => {
-  //   const index = squaresArray2.indexOf(e.target)
-  //   console.log('Player', index, player1Original[index])
-  //   checkValue(index, e)
-  // })
-
-  const $squares2 = $board2.find('div')
-  const squaresArray2 = Array.from($squares2)
   $ships.on('click', e => {
+    placing = true
     shipPosition = []
     const clickedShip = $(e.target)
     const selectedShipName = clickedShip.data('name')
     selectedShip = ships.find(ships => ships.name === selectedShipName)
     for (let i = 0; i < selectedShip.l; i++) {
       shipPosition.push(i)
-      // player1Original[i] = selectedShip.v
-      $(squaresArray2[i]).addClass('active')
+      $(playerSquaresArray[i]).addClass('active')
       clickedShip.css({
         height: 0,
         width: 0
@@ -106,68 +108,72 @@ $(() => {
     }
   })
 
-  //event listener for key strokes
   $(document).on('keydown', e => {
-    $squares2.removeClass('active')
-    switch (e.keyCode) {
-      case 37: // left
-        if (shipPosition[0] % gridWidth > 0) {
-          shipPosition.forEach((position, i) => {
-            shipPosition[i] = position - 1
-            $($squares2[shipPosition[i]]).addClass('active')
-          })
-        }
-        break
-      case 38: // up
-        if (shipPosition[shipPosition.length - 1] - gridWidth >= 0) {
-          shipPosition.forEach(
-            (position, i) => {
-              (shipPosition[i] = position - gridWidth)
-              $($squares2[shipPosition[i]]).addClass('active')
-            })
-        }
-        break
-      case 39: //right
-        if (shipPosition[shipPosition.length - 1] % gridWidth < gridWidth - 1) {
-          shipPosition.forEach((position, i) => {
-            shipPosition[i] = position + 1
-            $($squares2[shipPosition[i]]).addClass('active')
-          })
-        }
-        break
-      case 40: // down
-        if (shipPosition[0] + gridWidth < gridWidth * gridWidth) {
-          shipPosition.forEach(
-            (position, i) => {
-              (shipPosition[i] = position + gridWidth)
-              $($squares2[shipPosition[i]]).addClass('active')
-            })
-        }
-        break
-      case 13:
-        shipPosition.forEach(i => {
-          $(squaresArray2[i]).css({
-            'background-color': selectedShip.color
-          }) // <---- this could be a unique class for the ship
+    if (placing) {
 
-          player1Original[i] = selectedShip.v
-          player1[i] = selectedShip.v
-        })
-        break
+      switch (e.keyCode) {
+        case 37: // left
+          if (shipPosition[0] % gridWidth > 0) {
+            $playerSquares.removeClass('active')
+            shipPosition.forEach((position, i) => {
+              shipPosition[i] = position - 1
+              $($playerSquares[shipPosition[i]]).addClass('active')
+            })
+          }
+          break
+        case 38: // up
+          if (shipPosition[shipPosition.length - 1] - gridWidth >= 0) {
+            $playerSquares.removeClass('active')
+            shipPosition.forEach(
+              (position, i) => {
+                (shipPosition[i] = position - gridWidth)
+                $($playerSquares[shipPosition[i]]).addClass('active')
+              })
+          }
+          break
+        case 39: //right
+          if (shipPosition[shipPosition.length - 1] % gridWidth < gridWidth - 1) {
+            $playerSquares.removeClass('active')
+            shipPosition.forEach((position, i) => {
+              shipPosition[i] = position + 1
+              $($playerSquares[shipPosition[i]]).addClass('active')
+            })
+          }
+          break
+        case 40: // down
+          if (shipPosition[0] + gridWidth < gridWidth * gridWidth) {
+            $playerSquares.removeClass('active')
+            shipPosition.forEach(
+              (position, i) => {
+                (shipPosition[i] = position + gridWidth)
+                $($playerSquares[shipPosition[i]]).addClass('active')
+              })
+          }
+          break
+        case 13:
+          placing = false
+          shipPosition.forEach(i => {
+            $(playerSquaresArray[i]).css({
+              'background-color': selectedShip.color
+            }) // <---- this could be a unique class for the ship
 
-      case 32:
-        if (!isVertical(shipPosition)) {
-          $squares2.removeClass('active')
-          shipPosition = rotateShipVertical(shipPosition)
-        } else {
-          $squares2.removeClass('active')
-          shipPosition = rotateShipHorizontal(shipPosition)
-        }
-        break
+            player1Original[i] = selectedShip.v
+            player1[i] = selectedShip.v
+          })
+          break
+
+        case 32:
+          if (!isVertical(shipPosition)) {
+            $playerSquares.removeClass('active')
+            shipPosition = rotateShipVertical(shipPosition)
+          } else {
+            $playerSquares.removeClass('active')
+            shipPosition = rotateShipHorizontal(shipPosition)
+          }
+          break
+      }
     }
   })
-  createCpuPlayer()
-  createPlayer1()
 
   function isVertical(shipPosition) {
     if (shipPosition[1] - shipPosition[0] === 10)
@@ -181,7 +187,7 @@ $(() => {
     for (let i = 0; i < shipLength; i++) {
       verticalShip.push(shipPosition[0] + (gridWidth * i))
       verticalShip.forEach(i => {
-        $(squaresArray2[i]).addClass('active')
+        $(playerSquaresArray[i]).addClass('active')
       })
     }
     return verticalShip
@@ -191,32 +197,24 @@ $(() => {
     const horizontalShip = []
     const shipLength = selectedShip.l
     for (let i = 0; i < shipLength; i++) {
-      horizontalShip.push(shipPosition[0] + (i))
+      horizontalShip.push(shipPosition[0] + i)
       horizontalShip.forEach(i => {
-        $(squaresArray2[i]).addClass('active')
+        $(playerSquaresArray[i]).addClass('active')
       })
     }
     return horizontalShip
   }
 
-  function checkValue(index, e) {
-    const playerHit = $(e.target)
-    const value = isPlayer ? player1[index] : cpuPlayer[index]
-    const player = isPlayer ? player1 : cpuPlayer
-    const original = isPlayer ? player1Original : cpuPlayerOriginal
-    const squares = isPlayer ? squaresArray2 : squaresArray
-    const selected = isPlayer ? playerHit : getRandomNumber()
 
-
-    isPlayer = !isPlayer
-
+  function checkValue(index, player, board, squares) {
+    const value = player[index]
     if (value === 1) {
       return
     } else if (value === 0) {
       return
     } else if (value) {
       player[index] = 1
-      $(selected).css({
+      $(squares[index]).css({
         'background-color': 'red'
       })
       if (player.includes(value)) {
@@ -224,9 +222,11 @@ $(() => {
       } else {
         console.log('sunk')
         const sunkIndexes = []
-        original.forEach((v, i) => {
+        board.forEach((v, i) => {
+          console.log(v)
           if (v === value) sunkIndexes.push(i)
         })
+        console.log(sunkIndexes)
         sunkIndexes.forEach(sunk =>
           $(squares[sunk]).css({
             'background-color': 'black'
@@ -234,12 +234,13 @@ $(() => {
         )
       }
     } else {
-      player[index] = 0
-      $(selected).css({
+      board[index] = 0
+      $(squares[index]).css({
         'background-color': 'grey'
       })
     }
   }
+
 
   function createPlayer1() {
     player1Original = Array.apply(undefined, {
@@ -255,6 +256,8 @@ $(() => {
     ships.forEach(ship => checkForValidMove(cpuPlayerOriginal, ship))
     cpuPlayer = [...cpuPlayerOriginal]
   }
+
+  // TO REFACTOR ------------->
 
   function checkForValidMove(board, ship) {
     // Build an array to look up the original indexes regardless of whether it has been rotated or not
@@ -336,7 +339,7 @@ $(() => {
     final.forEach(space => {
       // Assign the value to the original cpu board
       cpuPlayerOriginal[space] = ship.v
-      $(squaresArray[space]).css({
+      $(cpuSquaresArray[space]).css({
         'background-color': ship.color
       })
     })
@@ -386,6 +389,7 @@ function rotateBoard(board, gridWidth) {
 // currentPiece = [1,2,3,4]
 // loop through and save to the index values (above) the correct value for the ship to player1Original
 // once all pieces are placed, start game, cpu player should generate own board
+
 
 //https://github.com/LearnTeachCode/Battleship-JavaScript/blob/gh-pages/battleship.js
 
