@@ -1,52 +1,3 @@
-// miss                  = 0
-// hit                   = 1
-// patrol-boat (2)       = 2
-// destroyer (3)         = 3
-// submarine (3)         = 4
-// battleship (4)        = 5
-// aircraft-carrier (5)  = 6
-
-// PSEUDOCODE FOR COMPUTER MOVE
-// Make new empty array for the size of the board
-// (later) Rotate board vertical or horizontal
-// Split the board into rows
-// Filter the rows by the number of free squares
-// Select one
-// Store the correct number in it
-
-// PSEUDOCODE FOR PLAYER MOVE
-// Create a player 1 with an empty array (gridWidth*gridWidth)
-// Add eventListener for each piece
-// When you click on each ship it appears (top left)
-// Use keyboard to move piece up down left right
-// Make sure that the piece can't move over the edges
-// Space to rotate the pieces
-// Enter to save
-// When you save, store the correct values into the player1
-// pieceValue = 4
-// piecePosition = [0,1,2,3]
-// Press right
-// currentPiece = [1,2,3,4]
-// loop through and save to the index values (above) the correct value for the ship to player1Original
-// once all pieces are placed, start game, cpu player should generate own board
-
-//https://github.com/LearnTeachCode/Battleship-JavaScript/blob/gh-pages/battleship.js
-
-// var u = undefined
-// var player1Original = [
-//   3, u, u, u, u, u, 4,
-//   3, 5, 5, 5, 5, u, 4,
-//   3, 6, u, u, u, u, 4,
-//   u, 6, u, u, u, u, u,
-//   u, 6, u, u, u, u, u,
-//   u, 6, u, u, 2, 2, u,
-//   u, 6, u, u, u, u, u
-// ]
-// var player1 = player1Original.slice(0)
-// displayBoardInConsole(player1, gridWidth)
-
-// const player1 = new Array(grid*grid)
-
 $(() => {
   const gridWidth = 10
   const $board = $('.board')
@@ -55,12 +6,17 @@ $(() => {
   let player1
   let cpuPlayerOriginal
   let cpuPlayer
+  let activePlayerOriginal
+  let activePlayer
+  let shipPosition = []
   let selectedShip
-  let hitcount = 0
-  const target = 17
+  // let hitcount = 0
+  // const target = 17
   // const $startgameButton = $('start-game')
   const $ships = $('.ship')
-  const ships = [{
+  const ships = [
+
+    {
       name: 'Patrol Boat',
       color: 'yellow',
       l: 2,
@@ -104,19 +60,18 @@ $(() => {
   const $squares = $board.find('div')
   const squaresArray = Array.from($squares)
   $squares.on('click', e => {
+    activePlayer = cpuPlayer
+    activePlayerOriginal = cpuPlayerOriginal
     const index = squaresArray.indexOf(e.target)
+    console.log('CPU', index, cpuPlayerOriginal[index])
     checkValue(index, e)
   })
 
   function createCpuPlayer() {
-    // Create an array with undefined values the size of the gridWidth in length and height
-    // - new Array(gridWidth * gridWidth) doesn't add undefined to the array?!
     cpuPlayerOriginal = Array.apply(undefined, {
       length: gridWidth * gridWidth
     })
-    // Loop through all ship pieces and find a space for it...
     ships.forEach(ship => checkForValidMove(cpuPlayerOriginal, ship))
-    // make a copy of the array for the game (i.e. sunk and miss shots etc)
     cpuPlayer = [...cpuPlayerOriginal]
   }
   createCpuPlayer()
@@ -127,30 +82,24 @@ $(() => {
     })
     player1 = [...player1Original]
   }
-
   createPlayer1()
 
   const $squares2 = $board2.find('div')
   const squaresArray2 = Array.from($squares2)
 
   $squares2.on('click', e => {
+    activePlayer = player1
+    activePlayerOriginal = player1Original
     const index = squaresArray2.indexOf(e.target)
-    console.log(index)
-    console.log(player1[index])
+    console.log('Player', index, player1Original[index])
+    checkValue(index, e)
   })
 
   $ships.on('click', e => {
     shipPosition = []
-    // let counter = 0;
     const clickedShip = $(e.target)
-    // take data attribute from HTML and assign to the event target
     const selectedShipName = clickedShip.data('name')
-    // console.log(selectedShipName)
-    // make the event-target our object
     selectedShip = ships.find(ships => ships.name === selectedShipName)
-    console.log(selectedShip)
-    // replace the indexes of array by the ship l
-
     for (let i = 0; i < selectedShip.l; i++) {
       shipPosition.push(i)
       player1Original[i] = selectedShip.v
@@ -160,33 +109,23 @@ $(() => {
         width: 0
       })
     }
-    // squares.removeClass(active)
-    // counter++;
-    // console.log(counter);
-    // if (counter === 5) {
-    //   $startgameButton.addClass();
-    // }
   })
-
-  //////////////////////////////////////////////////
-
-  let shipPosition = []
 
   //event listener for key strokes
   $(document).on('keydown', e => {
 
     switch (e.keyCode) {
-      case 37:
+
+      case 37: // left
         if (shipPosition[0] % gridWidth > 0) {
           $squares2.removeClass('active')
           shipPosition.forEach((position, i) => {
             shipPosition[i] = position - 1
             $($squares2[shipPosition[i]]).addClass('active')
           })
-          console.log('left', shipPosition)
         }
         break
-      case 38:
+      case 38: // up
         if (shipPosition[shipPosition.length - 1] - gridWidth >= 0) {
           $squares2.removeClass('active')
           shipPosition.forEach(
@@ -194,20 +133,18 @@ $(() => {
               (shipPosition[i] = position - gridWidth)
               $($squares2[shipPosition[i]]).addClass('active')
             })
-          console.log('up', shipPosition)
         }
         break
-      case 39:
+      case 39: //right
         if (shipPosition[shipPosition.length - 1] % gridWidth < gridWidth - 1) {
           $squares2.removeClass('active')
           shipPosition.forEach((position, i) => {
             shipPosition[i] = position + 1
             $($squares2[shipPosition[i]]).addClass('active')
           })
-          console.log('right', shipPosition)
         }
         break
-      case 40:
+      case 40: // down
         if (shipPosition[0] + gridWidth < gridWidth * gridWidth) {
           $squares2.removeClass('active')
           shipPosition.forEach(
@@ -215,13 +152,8 @@ $(() => {
               (shipPosition[i] = position + gridWidth)
               $($squares2[shipPosition[i]]).addClass('active')
             })
-          console.log('down', shipPosition)
         }
         break
-      case 32:
-        shipPosition.rotateShip()
-        break
-
       case 13:
         shipPosition.forEach(i => {
           $(squaresArray2[i]).css({
@@ -231,37 +163,74 @@ $(() => {
         })
         shipPosition = []
         break
+
+      case 32:
+        if (!isVertical(shipPosition)) {
+          $squares2.removeClass('active')
+          shipPosition = rotateShipVertical(shipPosition)
+        } else {
+          $squares2.removeClass('active')
+          shipPosition = rotateShipHorizontal(shipPosition)
+        }
+        break
     }
   })
 
+  function isVertical(shipPosition) {
+    if (shipPosition[1] - shipPosition[0] === 10)
+      return true
+  }
+
+  function rotateShipVertical(shipPosition) {
+    const verticalShip = []
+    const shipLength = selectedShip.l
+    // loop through ship length and retrun index0
+    for (let i = 0; i < shipLength; i++) {
+      verticalShip.push(shipPosition[0] + (gridWidth * i))
+      verticalShip.forEach(i => {
+        $(squaresArray2[i]).addClass('active')
+      })
+    }
+    return verticalShip
+  }
+
+  function rotateShipHorizontal(shipPosition) {
+    const horizontalShip = []
+    const shipLength = selectedShip.l
+    for (let i = 0; i < shipLength; i++) {
+      horizontalShip.push(shipPosition[0] + (i))
+      horizontalShip.forEach(i => {
+        $(squaresArray2[i]).addClass('active')
+      })
+    }
+    return horizontalShip
+  }
+
   function checkValue(index, e) {
-    const value = cpuPlayer[index]
-    // If you have already hit that square
-    if (value === 1) {
+    const value = activePlayer[index]
+    if (value === 1) { // already hit
       return
-      // If you have already missed that square
     } else if (value === 0) {
       return
-      // Check if there is a ship - HIT IT
     } else if (value) {
-      cpuPlayer[index] = 1
+      activePlayer[index] = 1
       $(e.target).css({
         'background-color': 'red'
       })
-      hitcount++
-      if (hitcount === target) {
-        alert('YOU HAVE WON')
-      }
-      console.log('hitcount', hitcount)
+      // hitcount++
+      // if (hitcount === target) {
+      //   alert('YOU HAVE WON')
+      // }
+      // console.log('hitcount', hitcount)
       // Check to see if the array still contains any of the same value
       // If not, then the ship must have been sunk!
-      if (cpuPlayer.includes(value)) {
+      if (activePlayer.includes(value)) {
         console.log('not sunk')
       } else {
         console.log('sunk')
         // Loop through the original array to return the indexes of the squares which contain the same number as the ship that has been sunk
         const sunkIndexes = []
-        cpuPlayerOriginal.forEach((v, i) => {
+        activePlayerOriginal.forEach((v, i) => {
           if (v === value) sunkIndexes.push(i)
         })
         // The length would give you which ship has been sunk...
@@ -275,7 +244,7 @@ $(() => {
       }
       // You've missed
     } else {
-      cpuPlayer[index] = 0
+      activePlayer[index] = 0
       $(e.target).css({
         'background-color': 'grey'
       })
@@ -392,7 +361,54 @@ function rotateBoard(board, gridWidth) {
   return unflattened.flat()
 }
 
+// miss                  = 0
+// hit                   = 1
+// patrol-boat (2)       = 2
+// destroyer (3)         = 3
+// submarine (3)         = 4
+// battleship (4)        = 5
+// aircraft-carrier (5)  = 6
 
+// PSEUDOCODE FOR COMPUTER MOVE
+// Make new empty array for the size of the board
+// (later) Rotate board vertical or horizontal
+// Split the board into rows
+// Filter the rows by the number of free squares
+// Select one
+// Store the correct number in it
+
+// PSEUDOCODE FOR PLAYER MOVE
+// Create a player 1 with an empty array (gridWidth*gridWidth)
+// Add eventListener for each piece
+// When you click on each ship it appears (top left)
+// Use keyboard to move piece up down left right
+// Make sure that the piece can't move over the edges
+// Space to rotate the pieces
+// Enter to save
+// When you save, store the correct values into the player1
+// pieceValue = 4
+// piecePosition = [0,1,2,3]
+// Press right
+// currentPiece = [1,2,3,4]
+// loop through and save to the index values (above) the correct value for the ship to player1Original
+// once all pieces are placed, start game, cpu player should generate own board
+
+//https://github.com/LearnTeachCode/Battleship-JavaScript/blob/gh-pages/battleship.js
+
+// var u = undefined
+// var player1Original = [
+//   3, u, u, u, u, u, 4,
+//   3, 5, 5, 5, 5, u, 4,
+//   3, 6, u, u, u, u, 4,
+//   u, 6, u, u, u, u, u,
+//   u, 6, u, u, u, u, u,
+//   u, 6, u, u, 2, 2, u,
+//   u, 6, u, u, u, u, u
+// ]
+// var player1 = player1Original.slice(0)
+// displayBoardInConsole(player1, gridWidth)
+
+// const player1 = new Array(grid*grid)
 
 // function displayBoardInConsole(board, gridWidth) {
 //   // Split the board into rows
