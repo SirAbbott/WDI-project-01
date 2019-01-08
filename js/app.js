@@ -9,7 +9,7 @@ $(() => {
   let shipPosition = []
   let selectedShip
   let placing = true
-  let canPlace = true
+  // let canPlace = true
   // let hitcount = 0
   // const target = 17
   const $ships = $('.ship')
@@ -51,6 +51,7 @@ $(() => {
   let $playerSquares = []
   let cpuSquaresArray = []
   let playerSquaresArray = []
+  const previousHit = []
 
   function init() {
 
@@ -106,18 +107,18 @@ $(() => {
     cpuPlayer = [...cpuPlayerVirtual]
   }
 
-  const previousHit = []
-  console.log('PREVIOUS HIT', previousHit)
-
   function cpuMove() {
     const index = getRandomNumber()
-    checkValue(index, player1, player1Virtual, $playerSquares)
-    previousHit.push(index)
-  }
+    console.log('PREVIOUS HIT', previousHit)
 
-  // function cpuCheckforHit() {
-  //
-  // }
+    if (previousHit.includes(index)) {
+      cpuMove()
+      console.log('SAME NUMBER')
+    } else {
+      previousHit.push(index)
+      fireTorpedo(index, player1, player1Virtual, $playerSquares)
+    }
+  }
 
   function getRandomNumber() {
     return Math.floor(Math.random() * gridWidth * gridWidth)
@@ -127,7 +128,7 @@ $(() => {
 
   $cpuSquares.on('click', e => {
     const index = cpuSquaresArray.indexOf(e.target)
-    checkValue(index, cpuPlayer, cpuPlayerVirtual, $cpuSquares)
+    fireTorpedo(index, cpuPlayer, cpuPlayerVirtual, $cpuSquares)
     cpuMove()
   })
 
@@ -148,7 +149,7 @@ $(() => {
   })
 
   $(document).on('keydown', e => {
-    if (placing && canPlace) {
+    if (placing) {
       switch (e.keyCode) {
         case 37: // left
           if (shipPosition[0] % gridWidth > 0) {
@@ -189,9 +190,7 @@ $(() => {
           }
           break
         case 13:
-          console.log('SHIP', shipPosition)
-          console.log('PLAYER 1', player1)
-          canPlaceShipHere(canPlace)
+          canPlaceShipHere()
           placing = false
           shipPosition.forEach(i => {
             $(playerSquaresArray[i]).css({
@@ -219,7 +218,7 @@ $(() => {
   function canPlaceShipHere() {
     shipPosition.forEach((element) => {
       if (player1[element] !== undefined) {
-        // do not run even listener
+        document.off('keydown', 13)
         console.log('can not place here')
       }
     })
@@ -242,25 +241,26 @@ $(() => {
         })
       }
       return verticalShip
+      // } else {
+      //   document.off('keydown', 32)
     }
   }
 
-  function rotateShipHorizontal(shipPosition, shipLength) {
-    if (shipPosition[0] < gridWidth - shipLength) {
-      const horizontalShip = []
-      const shipLength = selectedShip.l
-      for (let i = 0; i < shipLength; i++) {
-        horizontalShip.push(shipPosition[0] + i)
-        horizontalShip.forEach(i => {
-          $(playerSquaresArray[i]).addClass('active')
-        })
-      }
-      return horizontalShip
+  function rotateShipHorizontal(shipPosition) {
+    // if (shipPosition[0] < gridWidth - shipLength) {
+    const horizontalShip = []
+    const shipLength = selectedShip.l
+    for (let i = 0; i < shipLength; i++) {
+      horizontalShip.push(shipPosition[0] + i)
+      horizontalShip.forEach(i => {
+        $(playerSquaresArray[i]).addClass('active')
+      })
     }
+    return horizontalShip
+    // }
   }
 
-
-  function checkValue(index, player, board, squares) {
+  function fireTorpedo(index, player, board, squares) {
     const value = player[index]
     if (value === 1) {
       return
