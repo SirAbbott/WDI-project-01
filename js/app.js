@@ -3,7 +3,6 @@ $(() => {
   const $cpuBoard = $('.board')
   const $playerBoard = $('.board2')
   const $playerInfo = $('.player-info')
-  const $cpuInfo = $('.cpu-info')
   let player1Virtual
   let player1
   let cpuPlayerVirtual
@@ -11,6 +10,9 @@ $(() => {
   let shipPosition = []
   let selectedShip
   let placing = true
+  let gamePlaying = true
+  let shipsPlaced = 0
+  let canClick = true
   // let canPlace = true
   // let hitcount = 0
   // const target = 17
@@ -19,31 +21,26 @@ $(() => {
 
     {
       name: 'Patrol Boat',
-      color: 'yellow',
       l: 2,
       v: 2
     },
     {
       name: 'Destroyer',
-      color: 'blue',
       l: 3,
       v: 3
     },
     {
       name: 'Submarine',
-      color: 'orange',
       l: 3,
       v: 4
     },
     {
       name: 'Battleship',
-      color: 'green',
       l: 4,
       v: 5
     },
     {
       name: 'Aircraft Carrier',
-      color: 'purple',
       l: 5,
       v: 6
     }
@@ -87,13 +84,6 @@ $(() => {
     playerSquaresArray = Array.from($playerSquares)
   }
 
-  // function createPlayer(virtualBoard, player) {
-  //   virtualBoard = Array.apply(undefined, {
-  //     length: gridWidth * gridWidth
-  //   })
-  //   player = [...virtualBoard]
-  // }
-  //
 
   function createPlayer1() {
     player1Virtual = Array.apply(undefined, {
@@ -112,33 +102,46 @@ $(() => {
 
   let lastHit = previousHit[previousHit.length - 1]
   let squareHit = player1[lastHit]
+  const possibleSquaresToHit = [1, -1, gridWidth, -gridWidth]
+  const nextGuesses = []
 
-  const possibleSquaresToHit = [squareHit + 1, squareHit - 1, squareHit + gridWidth, squareHit - gridWidth]
-
-
-  const hitShipArray = []
-
-  // function nextSquareAfterHit(squareHit) {
-  //   for (let i = 0; i < possibleSquaresToHit; i++) {
-  //     squareHit = i
-  //     console.log(squareHit)
-  //   }
-  // }
-
-  // let originalHit
-  // let shotNumber = 1
+  function checkNextMove() {
+    lastHit = previousHit[previousHit.length - 1]
+    // Looked at all the previous moves that were made
+    // Generate potential moves from possibleSquaresToHit (valid)
+    const validGuesses = []
+    possibleSquaresToHit.forEach(move => {
+      const newMove = lastHit + move
+      if (
+        newMove > 0 &&
+        newMove < gridWidth * gridWidth &&
+        !previousHit.includes(newMove)
+      ) {
+        validGuesses.push(newMove)
+      }
+    })
+    return validGuesses
+  }
 
   function cpuMove() {
-
+    // Last time you made a hit
     lastHit = previousHit[previousHit.length - 1]
+    // The last guess
     squareHit = player1[lastHit]
     console.log('SQUARE', squareHit)
     console.log('LAST', lastHit)
-    randomHit = getRandomNumber()
+    // randomHit = getRandomNumber()
+    // randomHit = checkNextMove(lastHit);
+    if (checkNextMove.length) {
+      randomHit = nextGuesses[Math.floor(Math.random() * nextGuesses.length)]
+    } else {
+      randomHit = getRandomNumber()
+    }
 
     if (squareHit === 1) {
       previousHit.push(randomHit)
-      fireTorpedo(possibleSquaresToHit[0], player1, player1Virtual, $playerSquares)
+      randomHit = checkNextMove()
+      fireTorpedo(randomHit, player1, player1Virtual, $playerSquares)
       console.log(`YOU GOT HIT AT ${lastHit}`)
     } else if (previousHit.includes(randomHit)) {
       cpuMove()
@@ -152,101 +155,34 @@ $(() => {
     return Math.floor(Math.random() * gridWidth * gridWidth)
   }
 
-  // ------------------> Click Events
-
-  $cpuSquares.on('click', e => {
-    const index = cpuSquaresArray.indexOf(e.target)
-    fireTorpedo(index, cpuPlayer, cpuPlayerVirtual, $cpuSquares)
-    cpuMove()
-  })
-
-  $ships.on('click', e => {
-    placing = true
-    shipPosition = []
-    const clickedShip = $(e.target)
-    const selectedShipName = clickedShip.data('name')
-    selectedShip = ships.find(ships => ships.name === selectedShipName)
-    for (let i = 0; i < selectedShip.l; i++) {
-      shipPosition.push(i)
-      $(playerSquaresArray[i]).addClass('active')
-      clickedShip.css({
-        height: 0,
-        width: 0
-      })
+  function countClicks() {
+    if (shipsPlaced === 5) {
+      $playerInfo.html('Try and find opponents ship !')
+      toggleGamePlay()
     }
-  })
+  }
 
-  $(document).on('keydown', e => {
-    if (placing) {
-      switch (e.keyCode) {
-        case 37: // left
-          if (shipPosition[0] % gridWidth > 0) {
-            $playerSquares.removeClass('active')
-            shipPosition.forEach((position, i) => {
-              shipPosition[i] = position - 1
-              $($playerSquares[shipPosition[i]]).addClass('active')
-            })
-          }
-          break
-        case 38: // up
-          if (shipPosition[shipPosition.length - 1] - gridWidth >= 0) {
-            $playerSquares.removeClass('active')
-            shipPosition.forEach(
-              (position, i) => {
-                (shipPosition[i] = position - gridWidth)
-                $($playerSquares[shipPosition[i]]).addClass('active')
-              })
-          }
-          break
-        case 39: //right
-          if (shipPosition[shipPosition.length - 1] % gridWidth < gridWidth - 1) {
-            $playerSquares.removeClass('active')
-            shipPosition.forEach((position, i) => {
-              shipPosition[i] = position + 1
-              $($playerSquares[shipPosition[i]]).addClass('active')
-            })
-          }
-          break
-        case 40: // down
-          if (shipPosition[0] + gridWidth < gridWidth * gridWidth) {
-            $playerSquares.removeClass('active')
-            shipPosition.forEach(
-              (position, i) => {
-                (shipPosition[i] = position + gridWidth)
-                $($playerSquares[shipPosition[i]]).addClass('active')
-              })
-          }
-          break
-        case 13:
-          canPlaceShipHere()
-          placing = false
-          shipPosition.forEach(i => {
-            $(playerSquaresArray[i]).css({
-              'background-color': selectedShip.color
-            }) // <---- this could be a unique class for the ship
+  function toggleGamePlay() {
+    gamePlaying ? !gamePlaying : gamePlaying
+  }
 
-            player1Virtual[i] = selectedShip.v
-            player1[i] = selectedShip.v
-          })
-          break
+  function displayInstructions() {
+    $playerInfo.html('Use Space-bar to rotate and Enter to place')
+  }
 
-        case 32:
-          if (!isVertical(shipPosition)) {
-            $playerSquares.removeClass('active')
-            shipPosition = rotateShipVertical(shipPosition)
-          } else {
-            $playerSquares.removeClass('active')
-            shipPosition = rotateShipHorizontal(shipPosition, selectedShip.l)
-          }
-          break
-      }
-    }
-  })
+  if (gamePlaying === true) {
+    $cpuSquares.on('click', e => {
+      const index = cpuSquaresArray.indexOf(e.target)
+      fireTorpedo(index, cpuPlayer, cpuPlayerVirtual, $cpuSquares)
+      cpuMove()
+    })
+  }
+
 
   function canPlaceShipHere() {
     shipPosition.forEach((element) => {
       if (player1[element] !== undefined) {
-        console.log('can not place here')
+        $playerInfo.html('You can not place here')
         document.off('keydown', 13)
       }
     })
@@ -323,6 +259,7 @@ $(() => {
         'background-repeat': 'no-repeat',
         'background-position': 'center'
       })
+      $playerInfo.html('You missed')
     }
   }
 
@@ -392,6 +329,98 @@ $(() => {
       cpuPlayerVirtual[space] = ship.v
     })
   }
+
+  //------------------EVENT LISTENERS ---------------------------
+  $ships.on('click', e => {
+    const clickedShip = $(e.target)
+    const selectedShipName = clickedShip.data('name')
+    $playerInfo.html(`Use arrows to place your ${selectedShipName}`)
+    shipsPlaced++
+    placing = true
+    shipPosition = []
+    selectedShip = ships.find(ships => ships.name === selectedShipName)
+    for (let i = 0; i < selectedShip.l; i++) {
+      shipPosition.push(i)
+      $(playerSquaresArray[i]).addClass('active')
+      clickedShip.css({
+        'background': 'transparent'
+      })
+    }
+  })
+
+
+
+  $(document).on('keydown', e => {
+    if (placing) {
+      switch (e.keyCode) {
+        case 37: // left
+          if (shipPosition[0] % gridWidth > 0) {
+            $playerSquares.removeClass('active')
+            shipPosition.forEach((position, i) => {
+              shipPosition[i] = position - 1
+              $($playerSquares[shipPosition[i]]).addClass('active')
+            })
+          }
+          break
+        case 38: // up
+          if (shipPosition[shipPosition.length - 1] - gridWidth >= 0) {
+            $playerSquares.removeClass('active')
+            shipPosition.forEach(
+              (position, i) => {
+                (shipPosition[i] = position - gridWidth)
+                $($playerSquares[shipPosition[i]]).addClass('active')
+              })
+          }
+          break
+        case 39: //right
+          if (shipPosition[shipPosition.length - 1] % gridWidth < gridWidth - 1) {
+            displayInstructions()
+            $playerSquares.removeClass('active')
+            shipPosition.forEach((position, i) => {
+              shipPosition[i] = position + 1
+              $($playerSquares[shipPosition[i]]).addClass('active')
+            })
+          }
+          break
+        case 40: // down
+          if (shipPosition[0] + gridWidth < gridWidth * gridWidth) {
+            displayInstructions()
+            $playerSquares.removeClass('active')
+            shipPosition.forEach(
+              (position, i) => {
+                (shipPosition[i] = position + gridWidth)
+                $($playerSquares[shipPosition[i]]).addClass('active')
+              })
+          }
+          break
+        case 13:
+          $playerInfo.html(`${selectedShip.name} placed`)
+          countClicks()
+          canPlaceShipHere()
+          placing = false
+          shipPosition.forEach(i => {
+            $(playerSquaresArray[i]).css({
+              'background-color': 'rgba(0, 128, 43, 0.2)'
+            }) // <---- this could be a unique class for the ship
+
+            player1Virtual[i] = selectedShip.v
+            player1[i] = selectedShip.v
+          })
+          break
+
+        case 32:
+          if (!isVertical(shipPosition)) {
+            $playerSquares.removeClass('active')
+            shipPosition = rotateShipVertical(shipPosition)
+          } else {
+            $playerSquares.removeClass('active')
+            shipPosition = rotateShipHorizontal(shipPosition, selectedShip.l)
+          }
+          break
+      }
+    }
+  })
+
 })
 
 // ----------------------------------------------
