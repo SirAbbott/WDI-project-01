@@ -3,97 +3,99 @@
 
   body {
     main {
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: row-reverse;
-      margin: 0;
-      flex-wrap: wrap;
-
-      .board {
-        width: 506px;
-        height: 506px;
+      .game-section {
+        height: 100vh;
         display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: row-reverse;
+        margin: 0;
         flex-wrap: wrap;
-        margin: 20px;
-        border: black 1px solid;
-      }
 
-      .board2 {
-        width: 506px;
-        height: 506px;
-        display: flex;
-        flex-wrap: wrap;
-        margin: 20px;
-        border: black 1px solid;
-      }
-
-      .board div {
-        flex-grow: 1;
-        width: 50px;
-        height: 50px;
-        border: 1px grey solid;
-      }
-
-      .board2 div {
-        flex-grow: 1;
-        width: 50px;
-        height: 50px;
-        border: 1px grey solid;
-      }
-
-      .hidden {
-        background-color: transparent;
-      }
-
-      .placed {
-        background-color: #11F8F8;
-      }
-
-      .active {
-        background-color: #1BF811;
-      }
-
-      .pieces {
-        display: flex;
-        flex-direction: column;
-        align-content: space-around;
-        margin: 2px;
-
-        .aircraft-carrier {
-          height: 50px;
-          width: 250px;
-          background-color: purple;
-          margin: 2px;
+        .board {
+          width: 506px;
+          height: 506px;
+          display: flex;
+          flex-wrap: wrap;
+          margin: 20px;
+          border: black 1px solid;
         }
 
-        .battleship {
-          height: 50px;
-          width: 200px;
-          background-color: green;
-          margin: 2px;
+        .board2 {
+          width: 506px;
+          height: 506px;
+          display: flex;
+          flex-wrap: wrap;
+          margin: 20px;
+          border: black 1px solid;
         }
 
-        .submarine {
+        .board div {
+          flex-grow: 1;
+          width: 50px;
           height: 50px;
-          width: 150px;
-          background-color: orange;
-          margin: 2px;
+          border: 1px grey solid;
         }
 
-        .patrol-boat {
+        .board2 div {
+          flex-grow: 1;
+          width: 50px;
           height: 50px;
-          width: 100px;
-          background-color: yellow;
-          margin: 2px;
+          border: 1px grey solid;
         }
 
-        .destroyer {
-          height: 50px;
-          width: 150px;
-          background-color: blue;
+        .hidden {
+          background-color: transparent;
+        }
+
+        .placed {
+          background-color: #11F8F8;
+        }
+
+        .active {
+          background-color: #1BF811;
+        }
+
+        .pieces {
+          display: flex;
+          flex-direction: column;
+          align-content: space-around;
           margin: 2px;
+
+          .aircraft-carrier {
+            height: 50px;
+            width: 250px;
+            background-color: purple;
+            margin: 2px;
+          }
+
+          .battleship {
+            height: 50px;
+            width: 200px;
+            background-color: green;
+            margin: 2px;
+          }
+
+          .submarine {
+            height: 50px;
+            width: 150px;
+            background-color: orange;
+            margin: 2px;
+          }
+
+          .patrol-boat {
+            height: 50px;
+            width: 100px;
+            background-color: yellow;
+            margin: 2px;
+          }
+
+          .destroyer {
+            height: 50px;
+            width: 150px;
+            background-color: blue;
+            margin: 2px;
+          }
         }
       }
     }

@@ -1,27 +1,17 @@
-// miss                  = 0
-// hit                   = 1
-// patrol-boat (2)       = 2
-// destroyer (3)         = 3
-// submarine (3)         = 4
-// battleship (4)        = 5
-// aircraft-carrier (5)  = 6
-
-
 $(() => {
   const gridWidth = 10
   const $cpuBoard = $('.board')
   const $playerBoard = $('.board2')
-  let player1Original
+  let player1Virtual
   let player1
-  let cpuPlayerOriginal
+  let cpuPlayerVirtual
   let cpuPlayer
   let shipPosition = []
   let selectedShip
   let placing = true
-
+  let canPlace = true
   // let hitcount = 0
   // const target = 17
-
   const $ships = $('.ship')
   const ships = [
 
@@ -57,6 +47,24 @@ $(() => {
     }
   ]
 
+  let $cpuSquares = []
+  let $playerSquares = []
+  let cpuSquaresArray = []
+  let playerSquaresArray = []
+
+  function init() {
+
+    createBoards()
+    createSquares()
+    createArrayFromSquares()
+    // createPlayer(player1Virtual, player1)
+    // createPlayer(cpuPlayerVirtual, cpuPlayer)
+    createPlayer1()
+    createCpuPlayer()
+  }
+
+  init()
+
   function createBoards() {
     for (let i = 0; i < gridWidth * gridWidth; i++) {
       // Create square
@@ -64,33 +72,64 @@ $(() => {
       $cpuBoard.append($('<div>'))
     }
   }
-  createBoards()
 
-  const $cpuSquares = $cpuBoard.find('div')
-  const cpuSquaresArray = Array.from($cpuSquares)
-  const $playerSquares = $playerBoard.find('div')
-  const playerSquaresArray = Array.from($playerSquares)
+  function createSquares() {
+    $cpuSquares = $cpuBoard.find('div')
+    $playerSquares = $playerBoard.find('div')
+  }
 
-  createCpuPlayer()
-  createPlayer1()
+  function createArrayFromSquares() {
+    cpuSquaresArray = Array.from($cpuSquares)
+    playerSquaresArray = Array.from($playerSquares)
+  }
 
+  // function createPlayer(virtualBoard, player) {
+  //   virtualBoard = Array.apply(undefined, {
+  //     length: gridWidth * gridWidth
+  //   })
+  //   player = [...virtualBoard]
+  // }
+  //
 
-  $cpuSquares.on('click', e => {
-    const index = cpuSquaresArray.indexOf(e.target)
-    checkValue(index, cpuPlayer, cpuPlayerOriginal, $cpuSquares)
-    cpuMove()
-  })
+  function createPlayer1() {
+    player1Virtual = Array.apply(undefined, {
+      length: gridWidth * gridWidth
+    })
+    player1 = [...player1Virtual]
+  }
+
+  function createCpuPlayer() {
+    cpuPlayerVirtual = Array.apply(undefined, {
+      length: gridWidth * gridWidth
+    })
+    ships.forEach(ship => checkForValidMove(cpuPlayerVirtual, ship))
+    cpuPlayer = [...cpuPlayerVirtual]
+  }
+
+  const previousHit = []
+  console.log('PREVIOUS HIT', previousHit)
 
   function cpuMove() {
     const index = getRandomNumber()
-    checkValue(index, player1, player1Original, $playerSquares)
+    checkValue(index, player1, player1Virtual, $playerSquares)
+    previousHit.push(index)
   }
 
-  // index, e, player, board, squares
+  // function cpuCheckforHit() {
+  //
+  // }
 
   function getRandomNumber() {
     return Math.floor(Math.random() * gridWidth * gridWidth)
   }
+
+  // ------------------> Click Events
+
+  $cpuSquares.on('click', e => {
+    const index = cpuSquaresArray.indexOf(e.target)
+    checkValue(index, cpuPlayer, cpuPlayerVirtual, $cpuSquares)
+    cpuMove()
+  })
 
   $ships.on('click', e => {
     placing = true
@@ -109,8 +148,7 @@ $(() => {
   })
 
   $(document).on('keydown', e => {
-    if (placing) {
-
+    if (placing && canPlace) {
       switch (e.keyCode) {
         case 37: // left
           if (shipPosition[0] % gridWidth > 0) {
@@ -151,13 +189,16 @@ $(() => {
           }
           break
         case 13:
+          console.log('SHIP', shipPosition)
+          console.log('PLAYER 1', player1)
+          canPlaceShipHere(canPlace)
           placing = false
           shipPosition.forEach(i => {
             $(playerSquaresArray[i]).css({
               'background-color': selectedShip.color
             }) // <---- this could be a unique class for the ship
 
-            player1Original[i] = selectedShip.v
+            player1Virtual[i] = selectedShip.v
             player1[i] = selectedShip.v
           })
           break
@@ -168,12 +209,21 @@ $(() => {
             shipPosition = rotateShipVertical(shipPosition)
           } else {
             $playerSquares.removeClass('active')
-            shipPosition = rotateShipHorizontal(shipPosition)
+            shipPosition = rotateShipHorizontal(shipPosition, selectedShip.l)
           }
           break
       }
     }
   })
+
+  function canPlaceShipHere() {
+    shipPosition.forEach((element) => {
+      if (player1[element] !== undefined) {
+        // do not run even listener
+        console.log('can not place here')
+      }
+    })
+  }
 
   function isVertical(shipPosition) {
     if (shipPosition[1] - shipPosition[0] === 10)
@@ -181,28 +231,32 @@ $(() => {
   }
 
   function rotateShipVertical(shipPosition) {
-    const verticalShip = []
-    const shipLength = selectedShip.l
-    // loop through ship length and retrun index0
-    for (let i = 0; i < shipLength; i++) {
-      verticalShip.push(shipPosition[0] + (gridWidth * i))
-      verticalShip.forEach(i => {
-        $(playerSquaresArray[i]).addClass('active')
-      })
+    if (shipPosition[0] < gridWidth * (gridWidth - 1)) {
+      const verticalShip = []
+      const shipLength = selectedShip.l
+      // loop through ship length and retrun index0
+      for (let i = 0; i < shipLength; i++) {
+        verticalShip.push(shipPosition[0] + (gridWidth * i))
+        verticalShip.forEach(i => {
+          $(playerSquaresArray[i]).addClass('active')
+        })
+      }
+      return verticalShip
     }
-    return verticalShip
   }
 
-  function rotateShipHorizontal(shipPosition) {
-    const horizontalShip = []
-    const shipLength = selectedShip.l
-    for (let i = 0; i < shipLength; i++) {
-      horizontalShip.push(shipPosition[0] + i)
-      horizontalShip.forEach(i => {
-        $(playerSquaresArray[i]).addClass('active')
-      })
+  function rotateShipHorizontal(shipPosition, shipLength) {
+    if (shipPosition[0] < gridWidth - shipLength) {
+      const horizontalShip = []
+      const shipLength = selectedShip.l
+      for (let i = 0; i < shipLength; i++) {
+        horizontalShip.push(shipPosition[0] + i)
+        horizontalShip.forEach(i => {
+          $(playerSquaresArray[i]).addClass('active')
+        })
+      }
+      return horizontalShip
     }
-    return horizontalShip
   }
 
 
@@ -242,38 +296,17 @@ $(() => {
   }
 
 
-  function createPlayer1() {
-    player1Original = Array.apply(undefined, {
-      length: gridWidth * gridWidth
-    })
-    player1 = [...player1Original]
-  }
-
-  function createCpuPlayer() {
-    cpuPlayerOriginal = Array.apply(undefined, {
-      length: gridWidth * gridWidth
-    })
-    ships.forEach(ship => checkForValidMove(cpuPlayerOriginal, ship))
-    cpuPlayer = [...cpuPlayerOriginal]
-  }
-
   // TO REFACTOR ------------->
 
   function checkForValidMove(board, ship) {
-    // Build an array to look up the original indexes regardless of whether it has been rotated or not
     let arrayOfIndexes = []
     for (let i = 0; i < gridWidth * gridWidth; i++) {
       arrayOfIndexes.push(i)
     }
-    // Rotate board vertical or horizontal
-    // - https://stackoverflow.com/questions/17428587/transposing-a-2d-array-in-javascript
     if (Math.random() >= 0.5) {
-      // Rotate the board along with the indexes
       board = rotateBoard(board, gridWidth)
-      // Rotate the indexes along with the board
       arrayOfIndexes = rotateBoard(arrayOfIndexes, gridWidth)
     }
-    // Split the board into rows to help not select squares that are crossing a border
     const rows = chunkArray(board, gridWidth)
     // Create a counter for the index of the board
     let index = 0
@@ -296,31 +329,20 @@ $(() => {
         }
         index++
       })
-
       // Filter the chunks by the size of the piece that you are placing
-      // Red & Green
       return undefinedSquares.filter(consecutiveUndefinedSquare => consecutiveUndefinedSquare.length >= ship.l)
     })
-
     // Remove the outer array
     availableSpaces = availableSpaces.flat()
-
     // Remove all empty arrays where no move was possible in a row
     // I only want the available spaces where the ship can actually fit
     availableSpaces = availableSpaces.filter(available => available.length > 0)
-
     // Select random free chunk
     // This selected space is going to be ALL possible spaces, i.e [0,1,2,3,4]
     const selectedSpace =
       availableSpaces[Math.floor(Math.random() * availableSpaces.length)]
-
     // Build all possible moves in selected selectedSpace
     const possible = []
-    // [0,1,2,3,4]
-    // => [0,1]
-    // => [1,2] etc
-
-    // Starting at index 0
     let counter = 0
     selectedSpace.forEach(() => {
       // Copy the array as splice mutates the array
@@ -333,12 +355,10 @@ $(() => {
       counter++
     })
 
-    // Pick one of the possible moves randomly
     const final = possible[Math.floor(Math.random() * possible.length)]
 
     final.forEach(space => {
-      // Assign the value to the original cpu board
-      cpuPlayerOriginal[space] = ship.v
+      cpuPlayerVirtual[space] = ship.v
       $(cpuSquaresArray[space]).css({
         'background-color': ship.color
       })
@@ -365,6 +385,13 @@ function rotateBoard(board, gridWidth) {
   return unflattened.flat()
 }
 
+// miss                  = 0
+// hit                   = 1
+// patrol-boat (2)       = 2
+// destroyer (3)         = 3
+// submarine (3)         = 4
+// battleship (4)        = 5
+// aircraft-carrier (5)  = 6
 
 // PSEUDOCODE FOR COMPUTER MOVE
 // Make new empty array for the size of the board
@@ -387,8 +414,16 @@ function rotateBoard(board, gridWidth) {
 // piecePosition = [0,1,2,3]
 // Press right
 // currentPiece = [1,2,3,4]
-// loop through and save to the index values (above) the correct value for the ship to player1Original
+// loop through and save to the index values (above) the correct value for the ship to player1Virtual
 // once all pieces are placed, start game, cpu player should generate own board
+
+// PSUEDOCODE FOR RANDOMLY PLACING A SHIP
+// Build an array to look up the original indexes regardless of whether it has been rotated or not
+// Rotate board vertical or horizontal
+// - https://stackoverflow.com/questions/17428587/transposing-a-2d-array-in-javascript
+// Rotate the board along with the indexes
+// Rotate the indexes along with the board
+// Split the board into rows to help not select squares that are crossing a border
 
 
 //https://github.com/LearnTeachCode/Battleship-JavaScript/blob/gh-pages/battleship.js
