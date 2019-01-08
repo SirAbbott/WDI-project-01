@@ -2,6 +2,8 @@ $(() => {
   const gridWidth = 10
   const $cpuBoard = $('.board')
   const $playerBoard = $('.board2')
+  const $playerInfo = $('.player-info')
+  const $cpuInfo = $('.cpu-info')
   let player1Virtual
   let player1
   let cpuPlayerVirtual
@@ -52,6 +54,7 @@ $(() => {
   let cpuSquaresArray = []
   let playerSquaresArray = []
   const previousHit = []
+  let randomHit
 
   function init() {
 
@@ -107,16 +110,41 @@ $(() => {
     cpuPlayer = [...cpuPlayerVirtual]
   }
 
-  function cpuMove() {
-    const index = getRandomNumber()
-    console.log('PREVIOUS HIT', previousHit)
+  let lastHit = previousHit[previousHit.length - 1]
+  let squareHit = player1[lastHit]
 
-    if (previousHit.includes(index)) {
+  const possibleSquaresToHit = [squareHit + 1, squareHit - 1, squareHit + gridWidth, squareHit - gridWidth]
+
+
+  const hitShipArray = []
+
+  // function nextSquareAfterHit(squareHit) {
+  //   for (let i = 0; i < possibleSquaresToHit; i++) {
+  //     squareHit = i
+  //     console.log(squareHit)
+  //   }
+  // }
+
+  // let originalHit
+  // let shotNumber = 1
+
+  function cpuMove() {
+
+    lastHit = previousHit[previousHit.length - 1]
+    squareHit = player1[lastHit]
+    console.log('SQUARE', squareHit)
+    console.log('LAST', lastHit)
+    randomHit = getRandomNumber()
+
+    if (squareHit === 1) {
+      previousHit.push(randomHit)
+      fireTorpedo(possibleSquaresToHit[0], player1, player1Virtual, $playerSquares)
+      console.log(`YOU GOT HIT AT ${lastHit}`)
+    } else if (previousHit.includes(randomHit)) {
       cpuMove()
-      console.log('SAME NUMBER')
     } else {
-      previousHit.push(index)
-      fireTorpedo(index, player1, player1Virtual, $playerSquares)
+      previousHit.push(randomHit)
+      fireTorpedo(randomHit, player1, player1Virtual, $playerSquares)
     }
   }
 
@@ -218,8 +246,8 @@ $(() => {
   function canPlaceShipHere() {
     shipPosition.forEach((element) => {
       if (player1[element] !== undefined) {
-        document.off('keydown', 13)
         console.log('can not place here')
+        document.off('keydown', 13)
       }
     })
   }
@@ -290,7 +318,10 @@ $(() => {
     } else {
       board[index] = 0
       $(squares[index]).css({
-        'background-color': 'grey'
+        'background': 'url("miss.png")',
+        'background-size': 'contain',
+        'background-repeat': 'no-repeat',
+        'background-position': 'center'
       })
     }
   }
@@ -359,9 +390,6 @@ $(() => {
 
     final.forEach(space => {
       cpuPlayerVirtual[space] = ship.v
-      $(cpuSquaresArray[space]).css({
-        'background-color': ship.color
-      })
     })
   }
 })
