@@ -68,6 +68,8 @@ $(() => {
 
   init()
 
+
+
   // --------------- Create Boards
 
   function createBoards() {
@@ -104,23 +106,17 @@ $(() => {
     cpuPlayer.board = [...cpuPlayerVirtual]
   }
 
-  // --------------- hit logic ---------
 
-  function checkForWinner() {
-    if (cpuPlayer.hitcount === target) {
-      $playerInfo.html('Game over, you won')
-      endGame()
-    } else if (player1.hitcount === target) {
-      $playerInfo.html('Game over, you lost')
-      endGame()
-    }
-  }
+  // ---------------------------------
 
-  function endGame() {
-    $cpuSquares.off('click')
+
+  function getRandomNumber() {
+    return Math.floor(Math.random() * gridWidth * gridWidth)
   }
 
   // ----------------------- Hit logic
+
+
 
   function startGame() {
     $cpuSquares.on('click', e => {
@@ -131,6 +127,10 @@ $(() => {
       checkForWinner()
 
     })
+  }
+
+  function endGame() {
+    $cpuSquares.off('click')
   }
 
   function restartGame() {
@@ -150,6 +150,16 @@ $(() => {
     $playerInfo.html('click on a ship to place')
     console.log(player1.hitcount)
     // shipsPlaced = 0
+  }
+
+  function checkForWinner() {
+    if (cpuPlayer.hitcount === target) {
+      $playerInfo.html('Game over, you won')
+      endGame()
+    } else if (player1.hitcount === target) {
+      $playerInfo.html('Game over, you lost')
+      endGame()
+    }
   }
 
 
@@ -269,10 +279,7 @@ $(() => {
   // ------------------ End hit Logic
 
 
-
-  function getRandomNumber() {
-    return Math.floor(Math.random() * gridWidth * gridWidth)
-  }
+  // ----------- functions for moving and placing the ships
 
   function countClicks() {
     if (shipsPlaced === 5) {
@@ -337,6 +344,24 @@ $(() => {
   function removeClassActive() {
     $playerSquares.removeClass('active')
   }
+
+  function movePieceDown() {
+    shipPosition.forEach(
+      (position, i) => {
+        (shipPosition[i] = position + gridWidth)
+        $($playerSquares[shipPosition[i]]).addClass('active')
+      })
+  }
+
+  function movePieceUp() {
+    shipPosition.forEach(
+      (position, i) => {
+        (shipPosition[i] = position - gridWidth)
+        $($playerSquares[shipPosition[i]]).addClass('active')
+      })
+  }
+
+  //-------------------------------------
 
 
   // TO REFACTOR ------------->
@@ -443,18 +468,10 @@ $(() => {
         case 38: // up
           if (shipPosition[shipPosition.length - 1] - gridWidth >= 0 && !isVertical(shipPosition)) {
             removeClassActive()
-            shipPosition.forEach(
-              (position, i) => {
-                (shipPosition[i] = position - gridWidth)
-                $($playerSquares[shipPosition[i]]).addClass('active')
-              })
+            movePieceUp()
           } else if (isVertical(shipPosition) && shipPosition[0] - gridWidth >= 0) {
             removeClassActive()
-            shipPosition.forEach(
-              (position, i) => {
-                (shipPosition[i] = position - gridWidth)
-                $($playerSquares[shipPosition[i]]).addClass('active')
-              })
+            movePieceUp()
           }
           break
         case 39: //right
@@ -471,19 +488,11 @@ $(() => {
           if (shipPosition[0] + gridWidth < gridWidth * gridWidth && !isVertical(shipPosition)) {
             displayInstructions()
             removeClassActive()
-            shipPosition.forEach(
-              (position, i) => {
-                (shipPosition[i] = position + gridWidth)
-                $($playerSquares[shipPosition[i]]).addClass('active')
-              })
+            movePieceDown()
           } else if (isVertical(shipPosition) && shipPosition[shipPosition.length - 1] + gridWidth < gridWidth * gridWidth) {
             displayInstructions()
             removeClassActive()
-            shipPosition.forEach(
-              (position, i) => {
-                (shipPosition[i] = position + gridWidth)
-                $($playerSquares[shipPosition[i]]).addClass('active')
-              })
+            movePieceDown()
           }
           break
         case 13:
@@ -517,7 +526,7 @@ $(() => {
 
 })
 
-// ----------------------------------------------
+// ---------------------------------------
 
 function chunkArray(board, gridWidth) {
   const rows = []
