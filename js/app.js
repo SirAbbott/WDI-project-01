@@ -12,8 +12,9 @@ $(() => {
   let placing = true
   let shipsPlaced = 0
   // let canPlace = true
-  // let hitcount = 0
-  // const target = 17
+  let playerHitCount = 0
+  let cpuHitCount = 0
+  const target = 17
   const $ships = $('.ship')
   const ships = [
 
@@ -100,29 +101,44 @@ $(() => {
     cpuPlayer = [...cpuPlayerVirtual]
   }
 
-
   // --------------- hit logic ---------
 
+  function checkForWinner() {
+    if (cpuHitCount === target || playerHitCount === target) {
+      $playerInfo.html('Game over')
+      endGame()
+    }
+  }
+
+  function endGame() {
+    $cpuSquares.off('click')
+  }
+
+  // ----------------------- Hit logic
+
   function start() {
-    // if (gamePlaying === true) {
     $cpuSquares.on('click', e => {
       const index = cpuSquaresArray.indexOf(e.target)
-      fireTorpedo(index, cpuPlayer, cpuPlayerVirtual, $cpuSquares)
+      fireTorpedo(index, cpuPlayer, cpuHitCount, cpuPlayerVirtual, $cpuSquares)
       cpuMove()
-      // })
+      checkForWinner()
     })
   }
+
+  // function disableClick() {
+  //   $cpuSquares.off('click')
+  //   $playerInfo.html('You can not select this square')
+  // }
 
   let lastGuessinArray = previousHit[previousHit.length - 1]
   let squareHit = player1[lastGuessinArray]
   const possibleSquaresToHit = [1, -1, gridWidth, -gridWidth]
   const nextGuesses = []
+  const validGuesses = []
 
 
   function checkNextMove() {
     lastGuessinArray = previousHit[previousHit.length - 1]
-    const validGuesses = []
-    const guess = Math.floor(Math.random() * validGuesses.length)
     // Looked at all the previous moves that were made
     // Generate potential moves from possibleSquaresToHit (valid)
     // loop through possible squares to hit next
@@ -136,40 +152,45 @@ $(() => {
         !previousHit.includes(newMove)
       ) {
         validGuesses.push(newMove)
+        // console.log('possible guesses', validGuesses)
       }
     })
+    const guess = Math.floor(Math.random() * validGuesses.length)
     return validGuesses[guess]
   }
 
   function cpuMove() {
-    // Last time you made a hit
+    // Last time you made a hit)
     lastGuessinArray = previousHit[previousHit.length - 1]
     squareHit = player1[lastGuessinArray]
 
-
     if (checkNextMove.length) {
       randomHit = nextGuesses[Math.floor(Math.random() * nextGuesses.length)]
+      // console.log('HERE', randomHit)
     } else {
       randomHit = getRandomNumber()
     }
-
+    // has hit
     if (squareHit === 1) {
       randomHit = checkNextMove()
       previousHit.push(randomHit)
-      fireTorpedo(randomHit, player1, player1Virtual, $playerSquares)
+      fireTorpedo(randomHit, player1, playerHitCount, player1Virtual, $playerSquares)
+      // repeat number
     } else if (previousHit.includes(randomHit)) {
       cpuMove()
+      // guess again
     } else {
       previousHit.push(randomHit)
-      console.log('first hit previousHit[]', previousHit)
-      fireTorpedo(randomHit, player1, player1Virtual, $playerSquares)
+      // console.log('first hit previousHit[]', previousHit)
+      fireTorpedo(randomHit, player1, playerHitCount, player1Virtual, $playerSquares)
     }
-    console.log('the value of the last square that was guessed by cpu', squareHit)
-    console.log('the last index of the array of guesses', lastGuessinArray)
-    console.log('the array of previous guesses', previousHit)
+    // console.log('last guess value', squareHit)
+    // console.log('the last guess', lastGuessinArray)
+    // console.log('the array of previous guesses', previousHit)
+    // console.log('VALID GUESSES', validGuesses)
   }
 
-  function fireTorpedo(index, player, board, squares) {
+  function fireTorpedo(index, player, hitcount, board, squares) {
     const value = player[index]
     if (value === 1) {
       return
@@ -180,19 +201,24 @@ $(() => {
       $(squares[index]).css({
         'background-color': 'red'
       })
+      hitcount++
+      $playerInfo.html('Opponent hit')
+      console.log(hitcount)
       if (player.includes(value)) {
         console.log('not sunk')
       } else {
         console.log('sunk')
+        $playerInfo.html('Opponent sunk your ship')
         const sunkIndexes = []
         board.forEach((v, i) => {
-          console.log(v)
           if (v === value) sunkIndexes.push(i)
         })
-        console.log(sunkIndexes)
         sunkIndexes.forEach(sunk =>
           $(squares[sunk]).css({
-            'background-color': 'black'
+            'background': 'url("fire.png")',
+            'background-size': 'contain',
+            'background-repeat': 'no-repeat',
+            'background-position': 'center'
           })
         )
       }
@@ -207,6 +233,8 @@ $(() => {
       $playerInfo.html('You missed')
     }
   }
+
+  // ------------------ End hit Logic
 
   function getRandomNumber() {
     return Math.floor(Math.random() * gridWidth * gridWidth)
@@ -409,7 +437,6 @@ $(() => {
           break
         case 13:
           $playerInfo.html(`${selectedShip.name} placed`)
-          console.log(shipsPlaced)
           countClicks()
           canPlaceShipHere()
           placing = false

@@ -2,7 +2,7 @@
   box-sizing: border-box;
 
   body {
-    background: #1a3300;
+    background: url("https://media3.giphy.com/media/3oKIPaGG4PDQgQDFZe/giphy.gif?cid=3640f6095c35e18f756d775573249350");
     background-size: cover;
     background-repeat: no-repeat;
     font-family: 'Orbitron', sans-serif;
@@ -49,7 +49,7 @@
         }
 
         .board:hover {
-          cursor: url("cursor.png");
+          cursor: url('../target.png'), auto;
         }
 
         .board div,
@@ -90,11 +90,19 @@
           background-color: rgb(0, 26, 0);
         }
 
+        .aircraft-carrier:hover {
+          background-color: #56f442;
+        }
+
         .battleship {
           height: 50px;
           width: 200px;
           margin: 2px;
           background-color: rgb(0, 26, 0);
+        }
+
+        .battleship:hover {
+          background-color: #56f442;
         }
 
         .submarine {
@@ -104,6 +112,10 @@
           background-color: rgb(0, 26, 0);
         }
 
+        .submarine:hover {
+          background-color: #56f442;
+        }
+
         .patrol-boat {
           height: 50px;
           width: 100px;
@@ -111,11 +123,19 @@
           background-color: rgb(0, 26, 0);
         }
 
+        .patrol-boat:hover {
+          background-color: #56f442;
+        }
+
         .destroyer {
           height: 50px;
           width: 150px;
           margin: 2px;
           background-color: rgb(0, 26, 0);
+        }
+
+        .destroyer:hover {
+          background-color: #56f442;
         }
       }
     }
