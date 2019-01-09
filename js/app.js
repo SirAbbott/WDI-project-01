@@ -10,9 +10,7 @@ $(() => {
   let shipPosition = []
   let selectedShip
   let placing = true
-  let gamePlaying = true
   let shipsPlaced = 0
-  let canClick = true
   // let canPlace = true
   // let hitcount = 0
   // const target = 17
@@ -66,6 +64,8 @@ $(() => {
 
   init()
 
+  // --------------- Create Boards
+
   function createBoards() {
     for (let i = 0; i < gridWidth * gridWidth; i++) {
       // Create square
@@ -100,38 +100,53 @@ $(() => {
     cpuPlayer = [...cpuPlayerVirtual]
   }
 
-  let lastHit = previousHit[previousHit.length - 1]
-  let squareHit = player1[lastHit]
+
+  // --------------- hit logic ---------
+
+  function start() {
+    // if (gamePlaying === true) {
+    $cpuSquares.on('click', e => {
+      const index = cpuSquaresArray.indexOf(e.target)
+      fireTorpedo(index, cpuPlayer, cpuPlayerVirtual, $cpuSquares)
+      cpuMove()
+      // })
+    })
+  }
+
+  let lastGuessinArray = previousHit[previousHit.length - 1]
+  let squareHit = player1[lastGuessinArray]
   const possibleSquaresToHit = [1, -1, gridWidth, -gridWidth]
   const nextGuesses = []
 
+
   function checkNextMove() {
-    lastHit = previousHit[previousHit.length - 1]
+    lastGuessinArray = previousHit[previousHit.length - 1]
+    const validGuesses = []
+    const guess = Math.floor(Math.random() * validGuesses.length)
     // Looked at all the previous moves that were made
     // Generate potential moves from possibleSquaresToHit (valid)
-    const validGuesses = []
+    // loop through possible squares to hit next
     possibleSquaresToHit.forEach(move => {
-      const newMove = lastHit + move
+      const newMove = lastGuessinArray + move
       if (
+        // make sure it fits in the grid
         newMove > 0 &&
         newMove < gridWidth * gridWidth &&
+        // and is not included in the previous hit array
         !previousHit.includes(newMove)
       ) {
         validGuesses.push(newMove)
       }
     })
-    return validGuesses
+    return validGuesses[guess]
   }
 
   function cpuMove() {
     // Last time you made a hit
-    lastHit = previousHit[previousHit.length - 1]
-    // The last guess
-    squareHit = player1[lastHit]
-    console.log('SQUARE', squareHit)
-    console.log('LAST', lastHit)
-    // randomHit = getRandomNumber()
-    // randomHit = checkNextMove(lastHit);
+    lastGuessinArray = previousHit[previousHit.length - 1]
+    squareHit = player1[lastGuessinArray]
+
+
     if (checkNextMove.length) {
       randomHit = nextGuesses[Math.floor(Math.random() * nextGuesses.length)]
     } else {
@@ -139,89 +154,19 @@ $(() => {
     }
 
     if (squareHit === 1) {
-      previousHit.push(randomHit)
       randomHit = checkNextMove()
+      previousHit.push(randomHit)
       fireTorpedo(randomHit, player1, player1Virtual, $playerSquares)
-      console.log(`YOU GOT HIT AT ${lastHit}`)
     } else if (previousHit.includes(randomHit)) {
       cpuMove()
     } else {
       previousHit.push(randomHit)
+      console.log('first hit previousHit[]', previousHit)
       fireTorpedo(randomHit, player1, player1Virtual, $playerSquares)
     }
-  }
-
-  function getRandomNumber() {
-    return Math.floor(Math.random() * gridWidth * gridWidth)
-  }
-
-  function countClicks() {
-    if (shipsPlaced === 5) {
-      $playerInfo.html('Try and find opponents ship !')
-      toggleGamePlay()
-    }
-  }
-
-  function toggleGamePlay() {
-    gamePlaying ? !gamePlaying : gamePlaying
-  }
-
-  function displayInstructions() {
-    $playerInfo.html('Use Space-bar to rotate and Enter to place')
-  }
-
-  if (gamePlaying === true) {
-    $cpuSquares.on('click', e => {
-      const index = cpuSquaresArray.indexOf(e.target)
-      fireTorpedo(index, cpuPlayer, cpuPlayerVirtual, $cpuSquares)
-      cpuMove()
-    })
-  }
-
-
-  function canPlaceShipHere() {
-    shipPosition.forEach((element) => {
-      if (player1[element] !== undefined) {
-        $playerInfo.html('You can not place here')
-        document.off('keydown', 13)
-      }
-    })
-  }
-
-  function isVertical(shipPosition) {
-    if (shipPosition[1] - shipPosition[0] === 10)
-      return true
-  }
-
-  function rotateShipVertical(shipPosition) {
-    if (shipPosition[0] < gridWidth * (gridWidth - 1)) {
-      const verticalShip = []
-      const shipLength = selectedShip.l
-      // loop through ship length and retrun index0
-      for (let i = 0; i < shipLength; i++) {
-        verticalShip.push(shipPosition[0] + (gridWidth * i))
-        verticalShip.forEach(i => {
-          $(playerSquaresArray[i]).addClass('active')
-        })
-      }
-      return verticalShip
-      // } else {
-      //   document.off('keydown', 32)
-    }
-  }
-
-  function rotateShipHorizontal(shipPosition) {
-    // if (shipPosition[0] < gridWidth - shipLength) {
-    const horizontalShip = []
-    const shipLength = selectedShip.l
-    for (let i = 0; i < shipLength; i++) {
-      horizontalShip.push(shipPosition[0] + i)
-      horizontalShip.forEach(i => {
-        $(playerSquaresArray[i]).addClass('active')
-      })
-    }
-    return horizontalShip
-    // }
+    console.log('the value of the last square that was guessed by cpu', squareHit)
+    console.log('the last index of the array of guesses', lastGuessinArray)
+    console.log('the array of previous guesses', previousHit)
   }
 
   function fireTorpedo(index, player, board, squares) {
@@ -261,6 +206,74 @@ $(() => {
       })
       $playerInfo.html('You missed')
     }
+  }
+
+  function getRandomNumber() {
+    return Math.floor(Math.random() * gridWidth * gridWidth)
+  }
+
+  function countClicks() {
+    if (shipsPlaced === 5) {
+      $playerInfo.html('Try and find opponents ship !')
+      start()
+    }
+  }
+
+  function displayInstructions() {
+    $playerInfo.html('Use Space-bar to rotate and Enter to place')
+  }
+
+  function canPlaceShipHere() {
+    shipPosition.forEach((element) => {
+      if (player1[element] !== undefined) {
+        $playerInfo.html('You can not place here')
+        disableEnter()
+      }
+    })
+  }
+
+  function disableEnter() {
+    document.off('keydown', 13)
+  }
+
+  function isVertical(shipPosition) {
+    if (shipPosition[1] - shipPosition[0] === 10)
+      return true
+  }
+
+  function rotateShipVertical(shipPosition) {
+    if (shipPosition[0] < gridWidth * (gridWidth - 1)) {
+      const verticalShip = []
+      const shipLength = selectedShip.l
+      // loop through ship length and retrun index0
+      for (let i = 0; i < shipLength; i++) {
+        verticalShip.push(shipPosition[0] + (gridWidth * i))
+        verticalShip.forEach(i => {
+          $(playerSquaresArray[i]).addClass('active')
+        })
+      }
+      return verticalShip
+      // } else {
+      //   document.off('keydown', 32)
+    }
+  }
+
+  function rotateShipHorizontal(shipPosition) {
+    // if (shipPosition[0] < gridWidth - shipLength) {
+    const horizontalShip = []
+    const shipLength = selectedShip.l
+    for (let i = 0; i < shipLength; i++) {
+      horizontalShip.push(shipPosition[0] + i)
+      horizontalShip.forEach(i => {
+        $(playerSquaresArray[i]).addClass('active')
+      })
+    }
+    return horizontalShip
+    // }
+  }
+
+  function removeClassActive() {
+    $playerSquares.removeClass('active')
   }
 
 
@@ -331,6 +344,7 @@ $(() => {
   }
 
   //------------------EVENT LISTENERS ---------------------------
+
   $ships.on('click', e => {
     const clickedShip = $(e.target)
     const selectedShipName = clickedShip.data('name')
@@ -343,11 +357,11 @@ $(() => {
       shipPosition.push(i)
       $(playerSquaresArray[i]).addClass('active')
       clickedShip.css({
-        'background': 'transparent'
+        'height': '0',
+        'width': '0'
       })
     }
   })
-
 
 
   $(document).on('keydown', e => {
@@ -355,7 +369,7 @@ $(() => {
       switch (e.keyCode) {
         case 37: // left
           if (shipPosition[0] % gridWidth > 0) {
-            $playerSquares.removeClass('active')
+            removeClassActive()
             shipPosition.forEach((position, i) => {
               shipPosition[i] = position - 1
               $($playerSquares[shipPosition[i]]).addClass('active')
@@ -364,7 +378,7 @@ $(() => {
           break
         case 38: // up
           if (shipPosition[shipPosition.length - 1] - gridWidth >= 0) {
-            $playerSquares.removeClass('active')
+            removeClassActive()
             shipPosition.forEach(
               (position, i) => {
                 (shipPosition[i] = position - gridWidth)
@@ -375,7 +389,7 @@ $(() => {
         case 39: //right
           if (shipPosition[shipPosition.length - 1] % gridWidth < gridWidth - 1) {
             displayInstructions()
-            $playerSquares.removeClass('active')
+            removeClassActive()
             shipPosition.forEach((position, i) => {
               shipPosition[i] = position + 1
               $($playerSquares[shipPosition[i]]).addClass('active')
@@ -385,7 +399,7 @@ $(() => {
         case 40: // down
           if (shipPosition[0] + gridWidth < gridWidth * gridWidth) {
             displayInstructions()
-            $playerSquares.removeClass('active')
+            removeClassActive()
             shipPosition.forEach(
               (position, i) => {
                 (shipPosition[i] = position + gridWidth)
@@ -395,14 +409,14 @@ $(() => {
           break
         case 13:
           $playerInfo.html(`${selectedShip.name} placed`)
+          console.log(shipsPlaced)
           countClicks()
           canPlaceShipHere()
           placing = false
           shipPosition.forEach(i => {
             $(playerSquaresArray[i]).css({
-              'background-color': 'rgba(0, 128, 43, 0.2)'
+              'background-color': 'rgba(0, 128, 43, 0.5)'
             }) // <---- this could be a unique class for the ship
-
             player1Virtual[i] = selectedShip.v
             player1[i] = selectedShip.v
           })
@@ -410,10 +424,10 @@ $(() => {
 
         case 32:
           if (!isVertical(shipPosition)) {
-            $playerSquares.removeClass('active')
+            removeClassActive()
             shipPosition = rotateShipVertical(shipPosition)
           } else {
-            $playerSquares.removeClass('active')
+            removeClassActive()
             shipPosition = rotateShipHorizontal(shipPosition, selectedShip.l)
           }
           break
@@ -481,6 +495,7 @@ function rotateBoard(board, gridWidth) {
 // Rotate the board along with the indexes
 // Rotate the indexes along with the board
 // Split the board into rows to help not select squares that are crossing a border
+
 
 
 //https://github.com/LearnTeachCode/Battleship-JavaScript/blob/gh-pages/battleship.js
