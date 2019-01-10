@@ -8,16 +8,38 @@
     font-family: 'Orbitron', sans-serif;
 
     main {
-      // .play-again {
-      //   height: 100%;
-      //   background-color: rgba(0, 0, 51, 0.7);
-      // }
       h1 {
         text-align: center;
         text-transform: uppercase;
         font-size: 70px;
         color: #56f442;
         padding: 0;
+      }
+
+      .play-again {
+        display: flex;
+        text-transform: uppercase;
+        justify-content: center;
+        align-items: center;
+        background-color: rgba(96,96,96, 0.7);
+        height: 100vh;
+        width: 100vw;
+        transform: translateY(-837px);
+
+        .reset-box {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          width: 30%;
+          height: 30%;
+          background-color: rgba(0,0,0, 0.9);
+
+          p {
+            color: #56f442;
+            font-size: 30px;
+          }
+        }
       }
 
       .info-section {
