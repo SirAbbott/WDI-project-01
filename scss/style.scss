@@ -20,19 +20,27 @@
         padding: 0;
       }
 
-      .player-info {
-        text-align: center;
-        width: 700px;
-        height: 90px;
-        margin: auto;
-        color: #56f442;
-        text-transform: uppercase;
-        padding-top: 20px;
+      .info-section {
+        display: flex;
+        flex-direction: row;
+        align-content: space-around;
+        justify-content: center;
+
+        .cpu-info,
+        .player-info {
+          text-align: center;
+          align-items: center;
+          width: 50%;
+          height: 70px;
+          margin: auto;
+          color: #56f442;
+          text-transform: uppercase;
+          padding-top: 20px;
+        }
       }
 
       .game-section {
         display: flex;
-        align-items: center;
         justify-content: center;
         flex-direction: row-reverse;
         margin: 0;

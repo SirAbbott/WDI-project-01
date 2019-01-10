@@ -3,13 +3,28 @@ $(() => {
   const $cpuBoard = $('.board')
   const $playerBoard = $('.board2')
   const $playerInfo = $('.player-info')
+  const $cpuInfo = $('.cpu-info')
   const $playAgainButton = $('button')
   const $patrolBoat = $('.patrol-boat')
-  const $destroyer = $('destroyer')
-  const $submarine = $('submarine')
-  const $battleship = $('battleship')
-  const $aircraftCarrier = $('aircraft-carrier')
-
+  const $destroyer = $('.destroyer')
+  const $submarine = $('.submarine')
+  const $battleship = $('.battleship')
+  const $aircraftCarrier = $('.aircraft-carrier')
+  let player1Virtual
+  let cpuPlayerVirtual
+  let shipPosition = []
+  let selectedShip
+  let placing = true
+  let shipsPlaced = 0
+  const target = 17
+  const $ships = $('.ship')
+  let $cpuSquares
+  let $playerSquares
+  let cpuSquaresArray = []
+  let playerSquaresArray = []
+  const previousHit = []
+  let selectedShipName
+  let randomHit
   const player1 = {
     board: [],
     hitcount: 0,
@@ -22,15 +37,6 @@ $(() => {
     sunkShips: 0,
     name: 'CPU'
   }
-  let player1Virtual
-  let cpuPlayerVirtual
-  let shipPosition = []
-  let selectedShip
-  let placing = true
-  let shipsPlaced = 0
-  // let canPlace = true
-  const target = 17
-  const $ships = $('.ship')
   const ships = [
 
     {
@@ -65,14 +71,8 @@ $(() => {
     }
   ]
 
-  let $cpuSquares
-  let $playerSquares
-  let cpuSquaresArray = []
-  let playerSquaresArray = []
-  const previousHit = []
-  let randomHit
-
   function init() {
+    destroyBoard()
     createBoards()
     createSquares()
     createArrayFromSquares()
@@ -88,6 +88,8 @@ $(() => {
 
 
   function createBoards() {
+    $playerBoard.empty()
+    $cpuBoard.empty()
     for (let i = 0; i < gridWidth * gridWidth; i++) {
       // Create square
       $playerBoard.append($('<div>'))
@@ -121,6 +123,15 @@ $(() => {
     cpuPlayer.board = [...cpuPlayerVirtual]
   }
 
+  function destroyBoard() {
+    shipPosition = []
+    cpuSquaresArray = []
+    playerSquaresArray = []
+    shipsPlaced = 0
+    player1.hitcount = 0
+    cpuPlayer.hitcount = 0
+  }
+
 
   // ------------ Game playing funcitons
 
@@ -132,7 +143,6 @@ $(() => {
       fireTorpedo(index, cpuPlayer, cpuPlayerVirtual, $cpuSquares)
       cpuMove()
       checkForWinner()
-
     })
   }
 
@@ -141,25 +151,14 @@ $(() => {
   }
 
   function restartGame() {
-    createCpuPlayerBoard()
-    createPlayer1Board()
-    $cpuSquares.css({
-      'background': 'transparent'
-    })
-    console.log('SQUARES', $cpuSquares)
-    $playerSquares.css({
-      'background': 'transparent'
-    })
-    cpuSquaresArray = []
-    playerSquaresArray = []
-    player1.hitcount = 0
-    cpuPlayer.hitcount = 0
+    init()
+    // console.log('NEW', player1.board)
+    $ships.show()
     $playerInfo.html('click on a ship to place')
-    console.log(player1.hitcount)
-    // shipsPlaced = 0
+    $cpuInfo.html('')
   }
 
-  function countClicks() {
+  function countShipsPlaced() {
     if (shipsPlaced === 5) {
       $playerInfo.html('Try and find opponents ship !')
       startGame()
@@ -169,13 +168,14 @@ $(() => {
   function checkForWinner() {
     if (cpuPlayer.hitcount === target) {
       $playerInfo.html('Game over, you won')
+      $cpuInfo.html('Game over, you won')
       endGame()
     } else if (player1.hitcount === target) {
       $playerInfo.html('Game over, you lost')
+      $cpuInfo.html('Game over, you lost')
       endGame()
     }
   }
-
 
   //--------------------- Logic for cpu Random Guess --> Needs more work
 
@@ -201,7 +201,7 @@ $(() => {
         !previousHit.includes(newMove)
       ) {
         validGuesses.push(newMove)
-        console.log('VALID GUESSES', validGuesses)
+        // console.log('VALID GUESSES', validGuesses)
         // console.log('possible guesses', validGuesses)
       }
     })
@@ -262,18 +262,15 @@ $(() => {
       $(squares[index]).css({
         'background-color': 'red'
       })
-      console.log(player.name + ' ' + 'hit')
       player.hitcount++
-      console.log('Playing', player.hitcount)
       $playerInfo.html('Opponent hit your ship')
-      console.log('HITCOUNT', player.hitcount)
       if (player.board.includes(value)) {
-        console.log('not sunk')
+        // console.log('not sunk')
       } else {
-        console.log('sunk')
+        // console.log('sunk')
         player.sunkShips++
-        console.log('SUNK', player.sunkShips++)
-        console.log(player.name + ' ' + 'sunk ship')
+        // console.log('SUNK', player.sunkShips++)
+        // console.log(player.name + ' ' + 'ship has been sunk')
         $playerInfo.html('Opponent sunk your ship')
         const sunkIndexes = []
         board.forEach((v, i) => {
@@ -296,8 +293,9 @@ $(() => {
         'background-repeat': 'no-repeat',
         'background-position': 'center'
       })
-      $playerInfo.html('miss')
-      console.log(player.name + ' ' + 'missed')
+      // console.log(player.name + 'missed')
+      $playerInfo.html('Opponent missed')
+
     }
   }
 
@@ -457,7 +455,16 @@ $(() => {
 
   $ships.on('click', e => {
     const clickedShip = $(e.target)
-    const selectedShipName = clickedShip.data('name')
+
+    // Check if there are any active squares
+    const activeSquares = $(document).find('.active')
+    if (activeSquares.length) {
+      const selectedShip = ships.find(ship => ship.name === selectedShipName)
+      selectedShip.element.show()
+      $playerSquares.removeClass('active')
+    }
+
+    selectedShipName = clickedShip.data('name')
     $playerInfo.html(`Use arrows to place your ${selectedShipName}`)
     shipsPlaced++
     placing = true
@@ -465,12 +472,10 @@ $(() => {
     selectedShip = ships.find(ships => ships.name === selectedShipName)
     for (let i = 0; i < selectedShip.l; i++) {
       shipPosition.push(i)
-      $(playerSquaresArray[i]).addClass('active')
-      clickedShip.css({
-        'height': '0',
-        'width': '0'
-      })
+      const squareToMakeActive = $(playerSquaresArray[i])
+      squareToMakeActive.addClass('active')
     }
+    clickedShip.hide()
   })
 
 
@@ -516,9 +521,9 @@ $(() => {
             movePieceDown()
           }
           break
-        case 13:
+        case 13: // enter
           $playerInfo.html(`${selectedShip.name} placed`)
-          countClicks()
+          countShipsPlaced()
           canPlaceShipHere()
           placing = false
           shipPosition.forEach(i => {
@@ -528,9 +533,11 @@ $(() => {
             player1Virtual[i] = selectedShip.v
             player1.board[i] = selectedShip.v
           })
+          $playerSquares.removeClass('active')
+          // console.log(player1.board)
           break
 
-        case 32:
+        case 32: // space
           if (!isVertical(shipPosition)) {
             removeClassActive()
             shipPosition = rotateShipVertical(shipPosition)
