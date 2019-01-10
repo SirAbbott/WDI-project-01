@@ -18,7 +18,7 @@ $(() => {
   let selectedShip
   let placing = true
   let shipsPlaced = 0
-  const target = 17
+  const target = 1
   const $ships = $('.ship')
   let $cpuSquares
   let $playerSquares
@@ -41,7 +41,7 @@ $(() => {
     name: 'CPU',
     updateTextMiss: () => $cpuInfo.html('You missed'),
     updateTextHit: () => $cpuInfo.html('You hit opponent ship'),
-    updateTextSunk: () => $playerInfo.html('You sunk opponents ship')
+    updateTextSunk: () => $cpuInfo.html('You sunk opponents ship')
   }
   const ships = [
 
@@ -315,6 +315,8 @@ $(() => {
     if (value === 1) {
       return
     } else if (value === 0) {
+      return
+    } else if (value === 9) {
       return
     } else if (value) {
       player.board[index] = 1
