@@ -92,7 +92,7 @@ $(() => {
     $cpuBoard.empty()
     for (let i = 0; i < gridWidth * gridWidth; i++) {
       // Create square
-      $playerBoard.append($('<div>'))
+      $playerBoard.append($(`<div>${i}</div>`))
       $cpuBoard.append($('<div>'))
     }
   }
@@ -180,35 +180,35 @@ $(() => {
   //--------------------- Logic for cpu Random Guess --> Needs more work
 
 
-  let lastGuessinArray = previousHit[previousHit.length - 1]
-  let squareHit = player1.board[lastGuessinArray]
-  const possibleSquaresToHit = [1, -1, gridWidth, -gridWidth]
-  let validGuesses = []
+  // let lastGuessinArray = previousHit[previousHit.length - 1]
+  // let squareHit = player1.board[lastGuessinArray]
+  // const possibleSquaresToHit = [1, -1, gridWidth, -gridWidth]
+  // let validGuesses = []
 
 
-  function checkNextMove() {
-    lastGuessinArray = previousHit[previousHit.length - 1]
-    // Looked at all the previous moves that were made
-    // Generate potential moves from possibleSquaresToHit (valid)
-    // loop through possible squares to hit next
-    possibleSquaresToHit.forEach(move => {
-      const newMove = lastGuessinArray + move
-      if (
-        // make sure it fits in the grid
-        newMove > 0 &&
-        newMove < gridWidth * gridWidth &&
-        // and is not included in the previous hit array
-        !previousHit.includes(newMove)
-      ) {
-        validGuesses.push(newMove)
-        // console.log('VALID GUESSES', validGuesses)
-        // console.log('possible guesses', validGuesses)
-      }
-    })
-    const guess = Math.floor(Math.random() * validGuesses.length)
-    return validGuesses[guess]
-
-  }
+  // function checkNextMove() {
+  //   lastGuessinArray = previousHit[previousHit.length - 1]
+  //   // Looked at all the previous moves that were made
+  //   // Generate potential moves from possibleSquaresToHit (valid)
+  //   // loop through possible squares to hit next
+  //   possibleSquaresToHit.forEach(move => {
+  //     const newMove = lastGuessinArray + move
+  //     if (
+  //       // make sure it fits in the grid
+  //       newMove > 0 &&
+  //       newMove < gridWidth * gridWidth &&
+  //       // and is not included in the previous hit array
+  //       !previousHit.includes(newMove)
+  //     ) {
+  //       validGuesses.push(newMove)
+  //       // console.log('VALID GUESSES', validGuesses)
+  //       // console.log('possible guesses', validGuesses)
+  //     }
+  //   })
+  //   const guess = Math.floor(Math.random() * validGuesses.length)
+  //   return validGuesses[guess]
+  //
+  // }
 
   // store the hit value
   // store the possible next squares it can hit --> this done validGuesses
@@ -217,37 +217,98 @@ $(() => {
   // if the validGuess was a hit, pop the other possible moves out of the array and repeat > 5 *
   // take out attempt of validGuesses, do not clear and try next one
 
-
+  let lastGuesses = []
+  let lastGuessResult
+  let validGuesses = []
+  let possibleGuesses = Array.apply(null, {
+    length: gridWidth * gridWidth
+  }).map(Number.call, Number)
+  const possibleSquaresToHit = [1, -1, gridWidth, -gridWidth]
 
   function cpuMove() {
-    // Last time you made a hit)
-    lastGuessinArray = previousHit[previousHit.length - 1]
-    squareHit = player1.board[lastGuessinArray]
-    if (checkNextMove.length) {
-      randomHit = validGuesses[Math.floor(Math.random() * validGuesses.length)]
-      // console.log('HERE', randomHit)
-    } else {
-      randomHit = getRandomNumber()
-    }
-    // has hit
-    if (squareHit === 1) {
-      randomHit = checkNextMove()
-      previousHit.push(randomHit)
-      fireTorpedo(randomHit, player1, player1Virtual, $playerSquares)
+    let nextGuess
+    if (!lastGuesses.length) {
+      nextGuess = possibleGuesses[Math.floor(Math.random() * possibleGuesses.length)] // From remaining squares
+    } else if (lastGuessResult === 'hit') {
+      // TO REFACTOR
+      possibleSquaresToHit.forEach(move => {
+        const newMove = lastGuesses[lastGuesses.length - 1] + move
+        if (
+          // make sure it fits in the grid
+          newMove >= 0 &&
+          newMove < gridWidth * gridWidth &&
+          // newMove % gridWidth < gridWidth - 1 &&
+          // newMove % gridWidth > 0 &&
+          // and is not included in the previous hit array
+          possibleGuesses.includes(newMove)
+        ) {
+          validGuesses.push(newMove)
+        }
+      })
+      // unique?
+      validGuesses = Array.from(new Set(validGuesses))
+
+      // validGuesses = validGuesses.sort((a, b) => Math.abs(a - lastGuesses[lastGuesses.length - 1]) - Math.abs(b - lastGuesses[lastGuesses.length - 1]))
+
+      // validGuesses = validGuesses.sort((a, b) => Math.abs(a % gridWidth) - Math.abs(b % gridWidth))
+      nextGuess = validGuesses[0]
+    } else if (lastGuessResult === 'sunk') {
       validGuesses = []
-      // repeat number
-    } else if (previousHit.includes(randomHit)) {
-      cpuMove()
-      // guess again
     } else {
-      previousHit.push(randomHit)
-      // console.log('first hit previousHit[]', previousHit)
-      fireTorpedo(randomHit, player1, player1Virtual, $playerSquares)
+      nextGuess = validGuesses[0]
     }
-    // console.log('last guess value', squareHit)
-    // console.log('the last guess', lastGuessinArray)
-    // console.log('the array of previous guesses', previousHit)
-    // console.log('VALID GUESSES', validGuesses)
+
+    if (!nextGuess) {
+      nextGuess = possibleGuesses[Math.floor(Math.random() * possibleGuesses.length)] // From remaining squares
+    }
+
+    lastGuesses.push(nextGuess)
+    fireTorpedo(nextGuess, player1, player1Virtual, $playerSquares)
+    const squareHit = player1.board[nextGuess]
+
+    if (squareHit === 1) {
+      lastGuessResult = 'hit'
+    } else if (squareHit === 9) {
+      lastGuessResult = 'sunk'
+    } else {
+      lastGuessResult = 'miss'
+    }
+    const possibleGuessIndex = possibleGuesses.indexOf(nextGuess)
+    if (possibleGuessIndex !== -1) possibleGuesses.splice(possibleGuessIndex, 1)
+
+    // Remove from the validGuesses Array
+    var validGuessIndex = validGuesses.indexOf(nextGuess)
+    if (validGuessIndex !== -1) validGuesses.splice(validGuessIndex, 1)
+
+
+    // // Last time you made a hit)
+    // lastGuessinArray = previousHit[previousHit.length - 1]
+    // squareHit = player1.board[lastGuessinArray]
+    // if (checkNextMove.length) {
+    //   randomHit = validGuesses[Math.floor(Math.random() * validGuesses.length)]
+    //   // console.log('HERE', randomHit)
+    // } else {
+    //   randomHit = getRandomNumber()
+    // }
+    // // has hit
+    // if (squareHit === 1) {
+    //   randomHit = checkNextMove()
+    //   previousHit.push(randomHit)
+    //   fireTorpedo(randomHit, player1, player1Virtual, $playerSquares)
+    //   validGuesses = []
+    //   // repeat number
+    // } else if (previousHit.includes(randomHit)) {
+    //   cpuMove()
+    //   // guess again
+    // } else {
+    //   previousHit.push(randomHit)
+    //   // console.log('first hit previousHit[]', previousHit)
+    //   fireTorpedo(randomHit, player1, player1Virtual, $playerSquares)
+    // }
+    // // console.log('last guess value', squareHit)
+    // // console.log('the last guess', lastGuessinArray)
+    // // console.log('the array of previous guesses', previousHit)
+    // // console.log('VALID GUESSES', validGuesses)
   }
 
   function fireTorpedo(index, player, board, squares) {
@@ -276,14 +337,15 @@ $(() => {
         board.forEach((v, i) => {
           if (v === value) sunkIndexes.push(i)
         })
-        sunkIndexes.forEach(sunk =>
+        sunkIndexes.forEach(sunk => {
+          player.board[sunk] = 9
           $(squares[sunk]).css({
             'background': 'url("fire.png")',
             'background-size': 'contain',
             'background-repeat': 'no-repeat',
             'background-position': 'center'
           })
-        )
+        })
       }
     } else {
       board[index] = 0
