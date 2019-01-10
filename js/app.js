@@ -138,8 +138,7 @@ $(() => {
     cpuPlayer.hitcount = 0
   }
 
-
-  // ------------ Game playing funcitons
+  // ----------- Game playing funcitons
 
 
   function startGame() {
@@ -183,9 +182,7 @@ $(() => {
       endGame()
     }
   }
-
   // ----------- functions for moving and placing the ships
-
 
   function canPlaceShipHere() {
     shipPosition.forEach((element) => {
