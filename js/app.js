@@ -1,4 +1,5 @@
 $(() => {
+  const target = 17
   const gridWidth = 10
   const $cpuBoard = $('.board')
   const $playerBoard = $('.board2')
@@ -18,7 +19,6 @@ $(() => {
   let selectedShip
   let placing = true
   let shipsPlaced = 0
-  const target = 1
   const $ships = $('.ship')
   let $cpuSquares
   let $playerSquares
