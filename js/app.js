@@ -4,13 +4,23 @@ $(() => {
   const $playerBoard = $('.board2')
   const $playerInfo = $('.player-info')
   const $playAgainButton = $('button')
+  const $patrolBoat = $('.patrol-boat')
+  const $destroyer = $('destroyer')
+  const $submarine = $('submarine')
+  const $battleship = $('battleship')
+  const $aircraftCarrier = $('aircraft-carrier')
+
   const player1 = {
     board: [],
-    hitcount: 0
+    hitcount: 0,
+    sunkShips: 0,
+    name: 'Player'
   }
   const cpuPlayer = {
     board: [],
-    hitcount: 0
+    hitcount: 0,
+    sunkShips: 0,
+    name: 'CPU'
   }
   let player1Virtual
   let cpuPlayerVirtual
@@ -26,27 +36,32 @@ $(() => {
     {
       name: 'Patrol Boat',
       l: 2,
-      v: 2
+      v: 2,
+      element: $patrolBoat
     },
     {
       name: 'Destroyer',
       l: 3,
-      v: 3
+      v: 3,
+      element: $destroyer
     },
     {
       name: 'Submarine',
       l: 3,
-      v: 4
+      v: 4,
+      element: $submarine
     },
     {
       name: 'Battleship',
       l: 4,
-      v: 5
+      v: 5,
+      element: $battleship
     },
     {
       name: 'Aircraft Carrier',
       l: 5,
-      v: 6
+      v: 6,
+      element: $aircraftCarrier
     }
   ]
 
@@ -58,7 +73,6 @@ $(() => {
   let randomHit
 
   function init() {
-
     createBoards()
     createSquares()
     createArrayFromSquares()
@@ -71,6 +85,7 @@ $(() => {
 
 
   // --------------- Create Boards
+
 
   function createBoards() {
     for (let i = 0; i < gridWidth * gridWidth; i++) {
@@ -107,15 +122,7 @@ $(() => {
   }
 
 
-  // ---------------------------------
-
-
-  function getRandomNumber() {
-    return Math.floor(Math.random() * gridWidth * gridWidth)
-  }
-
-  // ----------------------- Hit logic
-
+  // ------------ Game playing funcitons
 
 
   function startGame() {
@@ -150,6 +157,13 @@ $(() => {
     $playerInfo.html('click on a ship to place')
     console.log(player1.hitcount)
     // shipsPlaced = 0
+  }
+
+  function countClicks() {
+    if (shipsPlaced === 5) {
+      $playerInfo.html('Try and find opponents ship !')
+      startGame()
+    }
   }
 
   function checkForWinner() {
@@ -196,7 +210,13 @@ $(() => {
 
   }
 
+  // store the hit value
+  // store the possible next squares it can hit --> this done validGuesses
+  // pick a random square in valid guesses and replace randomHit with the new square ---> done
+  // if next hit is a miss, pop this number out ot validGuesses and try another
+  // if the validGuess was a hit, pop the other possible moves out of the array and repeat > 5 *
   // take out attempt of validGuesses, do not clear and try next one
+
 
 
   function cpuMove() {
@@ -242,6 +262,7 @@ $(() => {
       $(squares[index]).css({
         'background-color': 'red'
       })
+      console.log(player.name + ' ' + 'hit')
       player.hitcount++
       console.log('Playing', player.hitcount)
       $playerInfo.html('Opponent hit your ship')
@@ -250,6 +271,9 @@ $(() => {
         console.log('not sunk')
       } else {
         console.log('sunk')
+        player.sunkShips++
+        console.log('SUNK', player.sunkShips++)
+        console.log(player.name + ' ' + 'sunk ship')
         $playerInfo.html('Opponent sunk your ship')
         const sunkIndexes = []
         board.forEach((v, i) => {
@@ -273,24 +297,14 @@ $(() => {
         'background-position': 'center'
       })
       $playerInfo.html('miss')
+      console.log(player.name + ' ' + 'missed')
     }
   }
 
-  // ------------------ End hit Logic
 
 
   // ----------- functions for moving and placing the ships
 
-  function countClicks() {
-    if (shipsPlaced === 5) {
-      $playerInfo.html('Try and find opponents ship !')
-      startGame()
-    }
-  }
-
-  function displayInstructions() {
-    $playerInfo.html('Use Space-bar to rotate and Enter to place')
-  }
 
   function canPlaceShipHere() {
     shipPosition.forEach((element) => {
@@ -301,9 +315,6 @@ $(() => {
     })
   }
 
-  function disableEnter() {
-    document.off('keydown', 13)
-  }
 
   function isVertical(shipPosition) {
     if (shipPosition[1] - shipPosition[0] === 10)
@@ -311,45 +322,35 @@ $(() => {
   }
 
   function rotateShipVertical(shipPosition) {
-    if (shipPosition[0] < gridWidth * (gridWidth - 1)) {
-      const verticalShip = []
-      const shipLength = selectedShip.l
-      // loop through ship length and retrun index0
-      for (let i = 0; i < shipLength; i++) {
-        verticalShip.push(shipPosition[0] + (gridWidth * i))
-        verticalShip.forEach(i => {
-          $(playerSquaresArray[i]).addClass('active')
-        })
-      }
-      return verticalShip
-      // } else {
-      //   document.off('keydown', 32)
+    const verticalShip = []
+    // loop through ship length and retrun index0
+    for (let i = 0; i < selectedShip.l; i++) {
+      verticalShip.push(shipPosition[0] + (gridWidth * i))
+      verticalShip.forEach(i => {
+        $(playerSquaresArray[i]).addClass('active')
+      })
     }
+    return verticalShip
   }
 
+
   function rotateShipHorizontal(shipPosition) {
-    // if (shipPosition[0] < gridWidth - shipLength) {
     const horizontalShip = []
-    const shipLength = selectedShip.l
-    for (let i = 0; i < shipLength; i++) {
+    for (let i = 0; i < selectedShip.l; i++) {
       horizontalShip.push(shipPosition[0] + i)
       horizontalShip.forEach(i => {
         $(playerSquaresArray[i]).addClass('active')
       })
     }
     return horizontalShip
-    // }
   }
 
-  function removeClassActive() {
-    $playerSquares.removeClass('active')
-  }
 
   function movePieceDown() {
     shipPosition.forEach(
       (position, i) => {
         (shipPosition[i] = position + gridWidth)
-        $($playerSquares[shipPosition[i]]).addClass('active')
+        addClassActive(i)
       })
   }
 
@@ -357,11 +358,9 @@ $(() => {
     shipPosition.forEach(
       (position, i) => {
         (shipPosition[i] = position - gridWidth)
-        $($playerSquares[shipPosition[i]]).addClass('active')
+        addClassActive(i)
       })
   }
-
-  //-------------------------------------
 
 
   // TO REFACTOR ------------->
@@ -430,7 +429,29 @@ $(() => {
     })
   }
 
+  // --------------------- misc funcitons
 
+
+  function getRandomNumber() {
+    return Math.floor(Math.random() * gridWidth * gridWidth)
+  }
+
+  function disableEnter() {
+    document.off('keydown', 13)
+  }
+
+
+  function removeClassActive() {
+    $playerSquares.removeClass('active')
+  }
+
+  function addClassActive(i) {
+    $($playerSquares[shipPosition[i]]).addClass('active')
+  }
+
+  function displayInstructions() {
+    $playerInfo.html('Use Space-bar to rotate and Enter to place')
+  }
 
   //------------------EVENT LISTENERS ---------------------------
 
