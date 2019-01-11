@@ -76,6 +76,14 @@ $(() => {
       element: $aircraftCarrier
     }
   ]
+  // TODO ----->
+
+  const lastGuesses = []
+  let lastGuessResult
+  let validGuesses = []
+  let possibleGuesses = setCpuArray()
+  const possibleSquaresToHit = [1, -1, gridWidth, -gridWidth]
+
 
   function init() {
     destroyBoard()
@@ -136,13 +144,13 @@ $(() => {
     shipsPlaced = 0
     player1.hitcount = 0
     cpuPlayer.hitcount = 0
+    possibleGuesses = setCpuArray()
   }
 
+  // ----------- Game playing funcitons
 
-  // ------------ Game playing funcitons
 
-
-  function startGame() {
+  function player1Guess() {
     $cpuSquares.on('click', e => {
       const index = cpuSquaresArray.indexOf(e.target)
       if (cpuPlayerVirtual === undefined) return
@@ -160,7 +168,6 @@ $(() => {
 
   function restartGame() {
     init()
-    // console.log('NEW', player1.board)
     $ships.show()
     $playerInfo.html('click on a ship to place')
     $cpuInfo.html('')
@@ -170,7 +177,7 @@ $(() => {
   function countShipsPlaced() {
     if (shipsPlaced === 5) {
       $playerInfo.html('Try and find opponents ship !')
-      startGame()
+      player1Guess()
     }
   }
 
@@ -183,9 +190,7 @@ $(() => {
       endGame()
     }
   }
-
   // ----------- functions for moving and placing the ships
-
 
   function canPlaceShipHere() {
     shipPosition.forEach((element) => {
@@ -253,14 +258,14 @@ $(() => {
   // if next hit is a miss, pop this number out ot validGuesses and try another
   // if the validGuess was a hit, pop the other possible moves out of the array and repeat > 5 *
   // take out attempt of validGuesses, do not clear and try next one
+  // NEED TO REFACTOR -------------->
 
-  let lastGuesses = []
-  let lastGuessResult
-  let validGuesses = []
-  let possibleGuesses = Array.apply(null, {
-    length: gridWidth * gridWidth
-  }).map(Number.call, Number)
-  const possibleSquaresToHit = [1, -1, gridWidth, -gridWidth]
+  function setCpuArray() {
+    return Array.apply(null, {
+      length: gridWidth * gridWidth
+    }).map(Number.call, Number)
+  }
+
 
   function cpuMove() {
     let nextGuess
@@ -279,7 +284,6 @@ $(() => {
       })
       // unique?
       validGuesses = Array.from(new Set(validGuesses))
-
       nextGuess = validGuesses[0]
     } else if (lastGuessResult === 'sunk') {
       validGuesses = []
@@ -366,6 +370,7 @@ $(() => {
     for (let i = 0; i < gridWidth * gridWidth; i++) {
       arrayOfIndexes.push(i)
     }
+    // - https://stackoverflow.com/questions/17428587/transposing-a-2d-array-in-javascript
     if (Math.random() >= 0.5) {
       board = rotateBoard(board, gridWidth)
       arrayOfIndexes = rotateBoard(arrayOfIndexes, gridWidth)
@@ -417,9 +422,7 @@ $(() => {
       }
       counter++
     })
-
     const final = possible[Math.floor(Math.random() * possible.length)]
-
     final.forEach(space => {
       cpuPlayerVirtual[space] = ship.v
     })
